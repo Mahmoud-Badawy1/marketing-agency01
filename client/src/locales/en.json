@@ -1,0 +1,245 @@
+{
+  "nav": {
+    "brand_ar": "ماركتير برو",
+    "brand_en": "Marketer Pro",
+    "join_as_instructor": "Join Our Team",
+    "subscribe_now": "Book a Call",
+    "home": "Home",
+    "programs": "Services",
+    "pricing": "Pricing",
+    "instructor": "Our Team",
+    "services": "Services",
+    "contact": "Contact Us"
+  },
+  "footer": {
+    "tagline": "B2B Growth Agency. We turn marketing budgets into measurable revenue.",
+    "platform": "Agency",
+    "support": "Support",
+    "contact_us": "Contact Us",
+    "whatsapp": "WhatsApp",
+    "hours": "Available from 10 AM - 10 PM",
+    "all_rights_reserved": "All Rights Reserved",
+    "privacy_policy": "Privacy Policy",
+    "terms_conditions": "Terms & Conditions",
+    "faqs": "FAQs"
+  },
+  "hero": {
+    "reg_open": "Free Strategy Session",
+    "book_consultation": "Book Your Free Call",
+    "explore_services": "See Our Results",
+    "marketing_consulting": "Growth Consulting",
+    "professional_courses": "Performance Marketing",
+    "brand_building": "Brand Strategy",
+    "default_slide1": {
+      "title": "Scale your business revenue with",
+      "highlight": "Your #1 Growth Partner",
+      "subtitle": "We help startups and founders build always-on digital growth engines that convert"
+    },
+    "default_slide2": {
+      "title": "Every decision backed by",
+      "highlight": "Real Data & Metrics",
+      "subtitle": "We analyze market and competitor data to build a marketing strategy that maximizes ROI on every pound you spend"
+    },
+    "default_slide3": {
+      "title": "Growth strategies designed",
+      "highlight": "to outsmart your competition",
+      "subtitle": "Book a free strategy session and discover how we can double your sales in 90 days"
+    }
+  },
+  "gallery": {
+    "subtitle": "Portfolio & Success Stories",
+    "title_main": "Our \"",
+    "title_highlight": "Stunning",
+    "title_end": "\" Success Stories",
+    "description": "Swipe to browse real results of marketing campaigns and workshops we delivered.",
+    "no_items": "No success stories recorded yet.",
+    "event_date_label": "Event Date",
+    "success_story": "Success Story",
+    "workshop": "Workshop",
+    "case_study": "Case Study",
+    "news": "Updates & News",
+    "card1": {
+      "title": "Successful Marketing Campaign",
+      "description": "Achieved a 300% sales increase for our retail clients."
+    },
+    "card2": {
+      "title": "Social Media Marketing",
+      "description": "Advanced interactive workshop on the latest strategies."
+    },
+    "card3": {
+      "title": "Multiplying ROAS",
+      "description": "How we increased ROAS for a local fashion store by 5x."
+    },
+    "event": {
+      "title": "Upcoming Digital Marketing Conference",
+      "description": "Join us in the biggest marketing event to learn the latest strategies and tools.",
+      "date": "March 07, 2025"
+    }
+  },
+  "instructor": {
+    "expertise": "Leadership You Can Trust",
+    "work_with": "Partner with ",
+    "top_experts": "Growth Experts",
+    "event_date": "Event Date",
+    "default_name": "The Marketer Pro Team",
+    "default_title": "B2B Growth Agency · Founded by Performance Marketers",
+    "default_bio": "A collective of senior growth operators, media buyers, and brand strategists. We've managed 10M+ EGP in ad spend and scaled 500+ businesses across MENA.",
+    "default_quote": "We don't just run your ads — we become your growth department.",
+    "default_badge": "Growth Partners",
+    "achievements": {
+      "clients": "500+ Businesses Scaled",
+      "budgets": "10M+ EGP Managed",
+      "strategies": "Full-Funnel Expertise",
+      "rating": "98% Client Retention"
+    }
+  },
+  "why": {
+    "badge": "Why Founders Choose Us",
+    "title_main": "We don't just run ads, we build",
+    "title_highlight": "growth systems",
+    "description": "We embed ourselves in your business like an in-house marketing team — but with agency-level expertise and startup-speed execution.",
+    "cards": {
+      "problem": {
+        "title": "Burning budget with no ROI?",
+        "description": "Many business owners and marketers struggle to reach the target audience and generate real sales."
+      },
+      "solution": {
+        "title": "Data-Driven Growth Frameworks",
+        "description": "We offer courses and consultations based on practical market experience to ensure the best results."
+      },
+      "result": {
+        "title": "Predictable Revenue Machine",
+        "description": "Result: Noticeable improvement in sales, building a strong brand, and multiplied ROI."
+      }
+    }
+  },
+  "stats": {
+    "trainees": "Businesses Scaled",
+    "campaigns": "Campaigns Launched",
+    "roi": "Avg Client ROI"
+  },
+  "programs": {
+    "badge": "Our Core Services",
+    "title_main": "We deliver ",
+    "title_highlight": "end-to-end growth solutions",
+    "description": "From strategy to execution, we handle every aspect of your digital marketing so you can focus on building your product.",
+    "interactive": "Interactive",
+    "card1": {
+      "level": "Starter Package",
+      "title": "Performance Advertising",
+      "subtitle": "Meta, Google & TikTok Ads",
+      "description": "We launch, optimize and scale paid campaigns that bring qualified leads and measurable sales",
+      "age": "For Startups"
+    },
+    "card2": {
+      "level": "Growth Package",
+      "title": "SEO & Content Strategy",
+      "subtitle": "Organic Growth Engine",
+      "description": "We build SEO-driven content strategies that generate consistent organic traffic and establish thought leadership",
+      "age": "For Growing Businesses"
+    },
+    "card3": {
+      "level": "Enterprise Package",
+      "title": "Full-Stack Growth",
+      "subtitle": "Strategy + Execution + Analytics",
+      "description": "End-to-end marketing leadership: strategy, paid media, content, CRO, analytics — all under one roof",
+      "age": "For Scale-Ups"
+    }
+  },
+  "pricing": {
+    "badge": "Investment Plans",
+    "title_main": "Invest in ",
+    "title_highlight": "your business growth",
+    "description": "Transparent pricing designed for startups. Every plan includes strategy, execution, and reporting.",
+    "lifetime": "Lifetime",
+    "intensive": "Intensive bootcamp",
+    "egp": "EGP / Month",
+    "most_popular": "Most Popular",
+    "plan1": {
+      "name": "Startup Launchpad",
+      "subtitle": "Perfect for founders validating PMF",
+      "features": [
+        "Dedicated Account Manager",
+        "Monthly Strategy Call",
+        "2 Ad Platforms Managed",
+        "Weekly Performance Reports",
+        "Landing Page Optimization"
+      ]
+    },
+    "plan2": {
+      "name": "Growth Accelerator",
+      "subtitle": "For startups ready to scale aggressively",
+      "features": [
+        "Everything in Launchpad +",
+        "All Major Ad Platforms",
+        "Full Content Strategy & Production",
+        "SEO & Organic Growth",
+        "CRO & A/B Testing",
+        "Bi-Weekly Strategy Calls",
+        "Priority Slack Support"
+      ]
+    },
+    "service_packages": "Service Packages",
+    "choose_package": "Choose the right package ",
+    "for_business": "for your business",
+    "smart_investment": "A smart investment that brings you the highest return on investment",
+    "discount": "Discount",
+    "subscribe_now": "Get Started",
+    "start_now": "Book a Call"
+  },
+  "skills_section": {
+    "focus": "What we do best",
+    "impact": "The power of ",
+    "digital": "Strategic ",
+    "marketing": "Marketing",
+    "card1_title": "Brand Strategy That Converts",
+    "card1_desc": "We craft brand identities that resonate with your ICP and turn visitors into paying customers",
+    "card1_cta": "Book a Strategy Call",
+    "card2_title": "Paid Media That Scales",
+    "card2_desc": "Data-driven ad campaigns across Meta, Google, and TikTok that deliver consistent ROAS above industry benchmarks",
+    "card2_cta": "See Case Studies"
+  },
+  "skills": {
+    "campaigns": "Ads Campaign Management",
+    "seo": "Search Engine Optimization",
+    "copywriting": "Copywriting"
+  },
+  "subjects": {
+    "fb_insta": "Meta Ads Management",
+    "fb_insta_level": "Full Funnel",
+    "google": "Google Ads & PPC",
+    "google_level": "Search & Shopping",
+    "content": "Content & Social",
+    "content_level": "Strategy & Production",
+    "email": "Email & CRM",
+    "email_level": "Automation & Nurture"
+  },
+  "demo": {
+    "badge": "ROI Calculator",
+    "title_main": "Let the numbers speak for ",
+    "title_highlight": "your campaign results",
+    "description": "Plan your profit growth based on realistic data. Try our interactive ROI calculator to estimate the expected results from your marketing campaigns.",
+    "budget_label": "Monthly Ad Budget",
+    "aov_label": "Average Order Value (AOV)",
+    "roi_label": "Expected ROI",
+    "revenue_label": "Expected Revenue",
+    "leads_label": "Expected Leads",
+    "sales_label": "Estimated Sales",
+    "note": "* Figures shown are estimates based on average performance of our past campaigns. Actual results may vary based on industry and market competitiveness.",
+    "cta": "Start Your Campaign Now"
+  },
+  "testimonials": {
+    "badge": "Client Testimonials",
+    "title_main": "We create ",
+    "title_highlight": "success stories",
+    "title_end": "told by our partners",
+    "description": "We are proud of our long-term partnerships with leading agencies and brands. Here is what they say about their experience with Marketer Pro.",
+    "quote_alt": "Opinion of "
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "save": "Save",
+    "cancel": "Cancel"
+  }
+}
