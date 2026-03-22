@@ -33,7 +33,7 @@ import { ImageUploadInput } from "../settings/ImageUploadInput";
 import heroImage1 from "@assets/images/marketing_hero_1_1773563925795.png";
 import heroImage2 from "@assets/images/marketing_hero_2_1773563941883.png";
 import heroImage3 from "@assets/images/marketing_hero_3_1773563957738.png";
-import instructorFallback from "@assets/IMG_20251001_222118_706_1771129139868.jpg";
+import instructorFallback from "@assets/instructor.png";
 import { fallbackImages } from "@/lib/fallbackImages";
 
 export function SettingsTab() {
