@@ -32,12 +32,28 @@ export async function registerRoutes(
   console.log("DEBUG: registerRoutes called");
 
   // 🛡️ Middleware to check database connection readiness
-  const dbCheck = (req: Request, res: Response, next: NextFunction) => {
+  const dbCheck = async (req: Request, res: Response, next: NextFunction) => {
+    const state = mongoose.connection.readyState;
+    // If disconnected (0) or connecting (2), wait a bit for connection to settle
+    if (state === 0 || state === 2) {
+      console.log(`[DB_WAIT] Connection state is ${state}. Waiting for established connection...`);
+      
+      // Poll or wait for up to 5 seconds
+      let attempts = 0;
+      // We use a type assertion (as any) here because TypeScript narrows the type 
+      // of readyState based on the outer 'if', but the value can change during the 'await'.
+      while ((mongoose.connection.readyState as any) !== 1 && attempts < 10) {
+        await new Promise(resolve => setTimeout(resolve, 500));
+        attempts++;
+      }
+    }
+
     if (mongoose.connection.readyState !== 1) {
       console.error(`[DB_ERROR] Request ${req.method} ${req.path} failed: Database not connected (readyState: ${mongoose.connection.readyState})`);
       return res.status(503).json({ 
-        message: "قاعدة البيانات غير متصلة حالياً. يرجى التأكد من إضافة عنوان IP الخاص بالخادم إلى 'IP Access List' في MongoDB Atlas.",
-        error: "Database Connection Error"
+        message: "قاعدة البيانات غير متصلة حالياً. جاري المحاولة مرة أخرى، يرجى تحديث الصفحة بعد ثوانٍ قليلة.",
+        error: "Database Connection Error",
+        readyState: mongoose.connection.readyState
       });
     }
     next();
