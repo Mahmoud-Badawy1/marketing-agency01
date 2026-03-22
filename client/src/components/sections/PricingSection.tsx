@@ -35,8 +35,9 @@ export default function PricingSection() {
       : null;
 
   const displayPlans = dynamicPlans
-    ? dynamicPlans.map((p) => ({
+    ? dynamicPlans.map((p, idx) => ({
         ...p,
+        id: p.id || (idx === 0 ? "monthly" : idx === 1 ? "genius" : `plan-${idx}`),
         currency: "pricing.egp",
       }))
     : PRICING_PLANS.map((p, i) => ({ ...p, id: i === 0 ? "monthly" : "genius", discountPercent: 0, discountLabel: "" }));

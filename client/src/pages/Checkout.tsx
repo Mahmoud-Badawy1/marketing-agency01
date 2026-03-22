@@ -69,8 +69,8 @@ export default function Checkout() {
         discountPercent: number; 
         discountLabel: string | { ar?: string; en?: string } 
       }> = {};
-      for (const p of publicSettings.plans) {
-        const id = p.id || `plan-${Math.random().toString(36).substring(2, 9)}`;
+      publicSettings.plans.forEach((p, idx) => {
+        const id = p.id || (idx === 0 ? "monthly" : idx === 1 ? "genius" : `plan-${idx}`);
         dynamicPlans[id] = {
           name: p.name,
           price: parseInt(p.price) || 0,
@@ -79,7 +79,7 @@ export default function Checkout() {
           discountPercent: p.discountPercent || 0,
           discountLabel: p.discountLabel || "",
         };
-      }
+      });
       return { ...DEFAULT_PLANS, ...dynamicPlans };
     }
     return DEFAULT_PLANS;

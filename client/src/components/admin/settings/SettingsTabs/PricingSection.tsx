@@ -77,7 +77,7 @@ export function PricingSection({ plans, setPlans, handleSave, isSaving }: Pricin
                 </div>
                 <div className="flex items-center space-x-2 space-x-reverse">
                   <Switch id={`perChild-${pi}`} checked={plan.perChild} onCheckedChange={v => setPlans((p: any[]) => p.map((c, idx) => idx === pi ? {...c, perChild: v} : c))} />
-                  <Label htmlFor={`perChild-${pi}`}>التسعير لكل خدمة/مشروع (Per Child)</Label>
+                  <Label htmlFor={`perChild-${pi}`}>التسعير لكل خدمة/مشروع (Per Company)</Label>
                 </div>
               </div>
 
