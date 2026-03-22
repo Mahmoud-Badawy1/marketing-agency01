@@ -61,13 +61,21 @@ export default function Checkout() {
 
   const PLANS = (() => {
     if (publicSettings?.plans && publicSettings.plans.length > 0) {
-      const dynamicPlans: Record<string, { name: string; price: number; period: string; perChild: boolean; discountPercent: number; discountLabel: string }> = {};
+      const dynamicPlans: Record<string, { 
+        name: string | { ar?: string; en?: string }; 
+        price: number; 
+        period: string | { ar?: string; en?: string }; 
+        perChild: boolean; 
+        discountPercent: number; 
+        discountLabel: string | { ar?: string; en?: string } 
+      }> = {};
       for (const p of publicSettings.plans) {
-        dynamicPlans[p.id] = {
+        const id = p.id || `plan-${Math.random().toString(36).substring(2, 9)}`;
+        dynamicPlans[id] = {
           name: p.name,
           price: parseInt(p.price) || 0,
           period: p.period,
-          perChild: true,
+          perChild: !!p.perChild,
           discountPercent: p.discountPercent || 0,
           discountLabel: p.discountLabel || "",
         };
@@ -238,8 +246,8 @@ export default function Checkout() {
   const projectNames = projects.map(p => p.name).join(t({ ar: " و ", en: " and " }));
   const whatsappMessage = encodeURIComponent(
     t({
-      ar: `مرحباً، أنا ${clientName}\nتم طلب ${plan.name}${projects.length > 1 ? ` لـ ${projects.length} شركات/مشاريع` : ` للشركة: ${projectNames}`}\nالمبلغ: ${totalAfterDiscount} ج.م${hasDiscount ? ` (بعد خصم ${plan.discountPercent}%)` : ""}${couponApplied ? ` (كوبون: ${couponApplied.code})` : ""}\nرقم الطلب: ${orderId}\nأرجو تأكيد الطلب والتواصل للبدء.`,
-      en: `Hello, I'm ${clientName}\nI requested ${plan.name}${projects.length > 1 ? ` for ${projects.length} companies/projects` : ` for: ${projectNames}`}\nAmount: ${totalAfterDiscount} EGP${hasDiscount ? ` (After ${plan.discountPercent}% discount)` : ""}${couponApplied ? ` (Coupon: ${couponApplied.code})` : ""}\nOrder ID: ${orderId}\nPlease confirm the order.`
+      ar: `مرحباً، أنا ${clientName}\nتم طلب ${t(plan.name)}${projects.length > 1 ? ` لـ ${projects.length} شركات/مشاريع` : ` للشركة: ${projectNames}`}\nالمبلغ: ${totalAfterDiscount} ج.م${hasDiscount ? ` (بعد خصم ${plan.discountPercent}%)` : ""}${couponApplied ? ` (كوبون: ${couponApplied.code})` : ""}\nرقم الطلب: ${orderId}\nأرجو تأكيد الطلب والتواصل للبدء.`,
+      en: `Hello, I'm ${clientName}\nI requested ${t(plan.name)}${projects.length > 1 ? ` for ${projects.length} companies/projects` : ` for: ${projectNames}`}\nAmount: ${totalAfterDiscount} EGP${hasDiscount ? ` (After ${plan.discountPercent}% discount)` : ""}${couponApplied ? ` (Coupon: ${couponApplied.code})` : ""}\nOrder ID: ${orderId}\nPlease confirm the order.`
     })
   );
 
@@ -293,7 +301,7 @@ export default function Checkout() {
     <div className="min-h-screen bg-background overflow-x-hidden">
       <Helmet>
         <title>{t({ ar: "اشتراك الآن | ماركتير برو - Marketer Pro", en: "Subscribe Now | Marketer Pro" })}</title>
-        <meta name="description" content={t({ ar: `اطلب ${plan.name} - ${plan.price}${" ج.م"} / ${plan.period}. ابدأ رحلة نمو أعمالك مع ماركتير برو`, en: `Request ${plan.name} - ${plan.price} EGP / ${plan.period}. Start your business growth journey with Marketer Pro` })} />
+        <meta name="description" content={t({ ar: `اطلب ${t(plan.name)} - ${plan.price}${" ج.م"} / ${t(plan.period)}. ابدأ رحلة نمو أعمالك مع ماركتير برو`, en: `Request ${t(plan.name)} - ${plan.price} EGP / ${t(plan.period)}. Start your business growth journey with Marketer Pro` })} />
         <meta property="og:title" content={t({ ar: "اشترك الآن | ماركتير برو", en: "Subscribe Now | Marketer Pro" })} />
         <meta property="og:description" content={t({ ar: "سجل بياناتك للحصول على خدمات استشارية وتسويقية متقدمة - استشارة مبدئية مجانية", en: "Register your details to get advanced consulting and marketing services - Free initial consultation" })} />
         <link rel="canonical" href={`https://marketerpro.example.com/checkout/${planKey}`} />

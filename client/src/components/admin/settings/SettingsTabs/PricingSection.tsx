@@ -3,6 +3,7 @@ import { CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { BookOpen, Plus, Trash2 } from "lucide-react";
 import { BilingualInput } from "../BilingualInput";
 
@@ -29,7 +30,18 @@ export function PricingSection({ plans, setPlans, handleSave, isSaving }: Pricin
           className="mr-6 relative z-10" 
           onClick={(e) => {
             e.stopPropagation();
-            setPlans((p: any[]) => [...p, { name: {ar:"", en:""}, price: "0", features: [] }]);
+            setPlans((p: any[]) => [...p, { 
+              id: `plan-${Date.now()}`,
+              name: {ar:"", en:""}, 
+              subtitle: {ar:"", en:""}, 
+              price: "0", 
+              period: {ar:"", en:""},
+              features: [],
+              popular: false,
+              perChild: true,
+              discountPercent: 0,
+              discountLabel: {ar:"", en:""}
+            }]);
           }}
         >
           <Plus className="h-4 w-4 ml-1" /> إضافة باقة
@@ -44,10 +56,37 @@ export function PricingSection({ plans, setPlans, handleSave, isSaving }: Pricin
                 <Button variant="destructive" size="sm" onClick={() => setPlans((p: any[]) => p.filter((_, i) => i !== pi))}><Trash2 className="h-4 w-4"/></Button>
               </div>
               <BilingualInput label="اسم الباقة" value={plan.name} onChange={v => setPlans((p: any[]) => p.map((c, idx) => idx === pi ? {...c, name: v} : c))} />
+              <BilingualInput label="الكلمة المفتاحية (Subtitle)" value={plan.subtitle} onChange={v => setPlans((p: any[]) => p.map((c, idx) => idx === pi ? {...c, subtitle: v} : c))} />
               <BilingualInput label="المدة (مثال: شهرياً)" value={plan.period} onChange={v => setPlans((p: any[]) => p.map((c, idx) => idx === pi ? {...c, period: v} : c))} />
-              <div className="space-y-2">
-                <Label>السعر رقماً</Label>
-                <Input type="number" value={plan.price} onChange={e => setPlans((p: any[]) => p.map((c, idx) => idx === pi ? {...c, price: e.target.value} : c))} />
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>معرف الباقة (ID/Slug)</Label>
+                  <Input value={plan.id} onChange={e => setPlans((p: any[]) => p.map((c, idx) => idx === pi ? {...c, id: e.target.value} : c))} placeholder="e.g. basic-plan" />
+                </div>
+                <div className="space-y-2">
+                  <Label>السعر رقماً</Label>
+                  <Input type="number" value={plan.price} onChange={e => setPlans((p: any[]) => p.map((c, idx) => idx === pi ? {...c, price: e.target.value} : c))} />
+                </div>
+              </div>
+
+              <div className="flex flex-wrap gap-6 py-2">
+                <div className="flex items-center space-x-2 space-x-reverse">
+                  <Switch id={`popular-${pi}`} checked={plan.popular} onCheckedChange={v => setPlans((p: any[]) => p.map((c, idx) => idx === pi ? {...c, popular: v} : c))} />
+                  <Label htmlFor={`popular-${pi}`}>باقة مميزة (Popular)</Label>
+                </div>
+                <div className="flex items-center space-x-2 space-x-reverse">
+                  <Switch id={`perChild-${pi}`} checked={plan.perChild} onCheckedChange={v => setPlans((p: any[]) => p.map((c, idx) => idx === pi ? {...c, perChild: v} : c))} />
+                  <Label htmlFor={`perChild-${pi}`}>التسعير لكل خدمة/مشروع (Per Child)</Label>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t pt-4">
+                <div className="space-y-2">
+                  <Label>نسبة الخصم % (Discount Percent)</Label>
+                  <Input type="number" value={plan.discountPercent} onChange={e => setPlans((p: any[]) => p.map((c, idx) => idx === pi ? {...c, discountPercent: parseInt(e.target.value) || 0} : c))} />
+                </div>
+                <BilingualInput label="تسمية الخصم (Discount Label)" value={plan.discountLabel} onChange={v => setPlans((p: any[]) => p.map((c, idx) => idx === pi ? {...c, discountLabel: v} : c))} />
               </div>
               
               <div className="pt-4">

@@ -43,10 +43,10 @@ export default function PlanSummary({
         <div>
           <div className="flex items-center gap-2 mb-1">
             {planKey === "genius" && <Star className="h-5 w-5 text-accent fill-accent" />}
-            <h3 className="font-bold text-lg text-foreground" data-testid="text-plan-name">{plan.name}</h3>
+            <h3 className="font-bold text-lg text-foreground" data-testid="text-plan-name">{t(plan.name)}</h3>
           </div>
           <p className="text-sm text-muted-foreground">
-            {plan.period} {plan.perChild && projectsCount > 1 && t({ ar: `× ${projectsCount} خدمات`, en: `× ${projectsCount} Services` })}
+            {t(plan.period)} {plan.perChild && projectsCount > 1 && t({ ar: `× ${projectsCount} خدمات`, en: `× ${projectsCount} Services` })}
           </p>
           {hasDiscount && (
             <p className="text-xs font-semibold text-red-600 dark:text-red-400 mt-1">

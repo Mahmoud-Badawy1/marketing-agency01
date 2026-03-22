@@ -40,7 +40,7 @@ export default function SuccessSection({
         {t({ ar: `شكراً لك ${clientName}`, en: `Thank you, ${clientName}` })}
       </p>
       <p className="text-sm text-muted-foreground mb-6">
-        {t({ ar: `سيتم مراجعة التحويل والتواصل معك قريباً للانطلاق في رحلة نمو ${projectNames} عبر ${planName}`, en: `The transfer will be reviewed and we will contact you soon to begin the growth journey of ${projectNames} with ${planName}` })}
+        {t({ ar: `سيتم مراجعة التحويل والتواصل معك قريباً للانطلاق في رحلة نمو ${projectNames} عبر ${t(planName)}`, en: `The transfer will be reviewed and we will contact you soon to begin the growth journey of ${projectNames} with ${t(planName)}` })}
       </p>
 
       <div className={`bg-muted/50 rounded-md p-4 border border-border mb-6 text-${language === "ar" ? "right" : "left"}`}>

@@ -2,14 +2,15 @@ import { useQuery } from "@tanstack/react-query";
 
 interface PlanData {
   id: string;
-  name: string;
-  subtitle: string;
+  name: string | { ar?: string; en?: string };
+  subtitle: string | { ar?: string; en?: string };
   price: string;
-  period: string;
-  features: string[];
+  period: string | { ar?: string; en?: string };
+  features: (string | { ar?: string; en?: string })[];
   popular: boolean;
+  perChild: boolean;
   discountPercent?: number;
-  discountLabel?: string;
+  discountLabel?: string | { ar?: string; en?: string };
 }
 
 interface HeroSlide {
