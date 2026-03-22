@@ -4,7 +4,15 @@ import { useLocation } from "wouter";
 import { Link } from "wouter";
 import { NAV_ITEMS } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Send, Users, Globe } from "lucide-react";
+import { Menu, X, Send, LogIn, Globe, User, LogOut, Settings } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { usePublicSettings } from "@/hooks/use-public-settings";
 import { useLanguage } from "@/hooks/use-language";
 import { fallbackImages } from "@/lib/fallbackImages";
@@ -15,6 +23,12 @@ export default function Navbar() {
   const { data: settings } = usePublicSettings();
   const { language, setLanguage, t } = useLanguage();
   const mascotSrc = settings?.images?.mascot || fallbackImages.mascot;
+  const isLoggedIn = !!localStorage.getItem("userToken");
+
+  const handleLogout = () => {
+    localStorage.removeItem("userToken");
+    setLocation("/");
+  };
 
   const toggleLanguage = () => {
     setLanguage(language === "ar" ? "en" : "ar");
@@ -97,12 +111,35 @@ export default function Navbar() {
               transition={{ delay: 0.6 }}
               className="hidden sm:block"
             >
-              <Link href="/join-us">
-                <Button variant="outline" size="sm">
-                  <Users className="mx-1 h-4 w-4" />
-                  {t("nav.join_as_instructor")}
-                </Button>
-              </Link>
+              {isLoggedIn ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="icon" className="rounded-full">
+                      <User className="h-5 w-5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align={language === "ar" ? "start" : "end"} className="w-56">
+                    <DropdownMenuLabel>{t({ ar: "حسابي", en: "My Account" })}</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => setLocation("/dashboard")}>
+                      <User className="ml-2 h-4 w-4" />
+                      <span>{t({ ar: "الملف الشخصي", en: "Profile" })}</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleLogout} className="text-destructive">
+                      <LogOut className="ml-2 h-4 w-4" />
+                      <span>{t({ ar: "تسجيل الخروج", en: "Logout" })}</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <Link href="/login">
+                  <Button variant="outline" size="sm">
+                    {t("nav.login")}
+                    <LogIn className="mx-1 h-4 w-4" />
+                  </Button>
+                </Link>
+              )}
             </motion.div>
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
@@ -159,16 +196,30 @@ export default function Navbar() {
                   <Globe className="mx-2 h-4 w-4" />
                   {language === "ar" ? "English" : "العربية"}
                 </Button>
-                <Link href="/join-us">
+                {isLoggedIn ? (
                   <Button
-                  onClick={() => setMobileOpen(false)}
-                  variant="outline"
-                  className="w-full"
-                >
-                  <Users className="mx-1 h-4 w-4" />
-                  {t("nav.join_as_instructor")}
-                </Button>
-              </Link>
+                    onClick={() => {
+                      setMobileOpen(false);
+                      setLocation("/dashboard");
+                    }}
+                    variant="outline"
+                    className="w-full"
+                  >
+                    <User className="mx-1 h-4 w-4" />
+                    {t({ ar: "لوحة التحكم", en: "Dashboard" })}
+                  </Button>
+                ) : (
+                  <Link href="/login">
+                    <Button
+                      onClick={() => setMobileOpen(false)}
+                      variant="outline"
+                      className="w-full"
+                    >
+                      {t("nav.login")}
+                      <LogIn className="mx-1 h-4 w-4" />
+                    </Button>
+                  </Link>
+                )}
               <Button
                 onClick={() => scrollTo("#pricing")}
                 className="w-full bg-accent text-accent-foreground border-accent-border"

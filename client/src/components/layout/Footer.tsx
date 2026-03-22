@@ -13,7 +13,7 @@ export default function Footer() {
   const { data: settings } = usePublicSettings();
   const mascotSrc = settings?.images?.mascot || fallbackImages.mascot;
   const socialLinks = settings?.social || {};
-  const whatsappNumber = settings?.contact?.whatsapp || "201007673634";
+  const whatsappNumber = settings?.contact?.whatsapp || "201553145631";
 
   const footerLinks = {
     platform: [

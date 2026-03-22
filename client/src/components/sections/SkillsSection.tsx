@@ -1,8 +1,8 @@
 import { motion } from "framer-motion";
-import { SUBJECTS } from "@/lib/constants";
+import { SERVICES } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ArrowLeft, BookOpen } from "lucide-react";
+import { ArrowLeft, BookOpen, Search, BarChart3, PenTool, Palette, Star, Globe, Users, Megaphone, Layout, Settings, Briefcase } from "lucide-react";
 import {
   fadeInUp,
   fadeInRight,
@@ -42,7 +42,12 @@ export default function SkillsSection() {
   ];
 
   const skillsCards = settings?.skills_cards || defaultSkillCards;
-  const subjects = settings?.subjects || SUBJECTS;
+  const servicesData = settings?.services || settings?.subjects || SERVICES;
+
+  // Icon mapping for dynamic icons
+  const iconMap: Record<string, any> = {
+    Search, BarChart3, PenTool, Palette, Star, Globe, Users, Megaphone, Layout, Settings, BookOpen, Briefcase
+  };
   return (
     <section className="py-20 bg-card dark:bg-card">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -143,22 +148,25 @@ export default function SkillsSection() {
           viewport={viewportConfig}
           variants={staggerContainer}
         >
-          {subjects.map((subject: any, i: number) => {
+          {servicesData.map((service: any, i: number) => {
+            const IconComponent = iconMap[service.icon] || Briefcase;
             return (
               <motion.div key={i} variants={fadeInUp} custom={i}>
                 <Card
                   className="p-5 text-center hover-elevate border border-card-border"
-                  data-testid={`card-subject-${i}`}
+                  data-testid={`card-service-${i}`}
                 >
                   <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-muted flex items-center justify-center hover:rotate-[15deg] transition-transform duration-300">
-                    <BookOpen className="h-6 w-6 text-accent" />
+                    <IconComponent className="h-6 w-6 text-accent" />
                   </div>
                   <h3 className="font-bold text-foreground text-sm mb-1">
-                    {t(subject.title)}
+                    {t(service.title)}
                   </h3>
-                  <p className="text-xs text-muted-foreground">
-                    {t(subject.grade)}
-                  </p>
+                  {service.grade && (
+                    <p className="text-xs text-muted-foreground">
+                      {t(service.grade)}
+                    </p>
+                  )}
                 </Card>
               </motion.div>
             );

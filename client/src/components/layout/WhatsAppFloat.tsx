@@ -4,7 +4,7 @@ import { usePublicSettings } from "@/hooks/use-public-settings";
 
 export default function WhatsAppFloat() {
   const { data: settings } = usePublicSettings();
-  const whatsappNumber = settings?.contact?.whatsapp || "201007673634";
+  const whatsappNumber = settings?.contact?.whatsapp || "201553145631";
 
   return (
     <motion.a

@@ -4,10 +4,20 @@ import { adminFetch } from "@/lib/admin";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { LeadStatusBadge } from "../StatusBadges";
-import { formatDate, formatSchoolType } from "../utils/formatters";
+import { formatDate, formatServiceInterest } from "../utils/formatters";
 import type { LeadType } from "@shared/schema";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { useState } from "react";
+import { Info, MessageSquare, User, Phone, Mail, Building2, Wallet, Settings } from "lucide-react";
 
 export function LeadsTab() {
+  const [selectedLead, setSelectedLead] = useState<LeadType | null>(null);
   const { toast } = useToast();
   const { data: leads = [], isLoading } = useQuery<LeadType[]>({
     queryKey: ["/api/admin/leads"],
@@ -46,9 +56,10 @@ export function LeadsTab() {
         <thead>
           <tr className="border-b">
             <th className="text-right p-3 font-medium">اسم العميل</th>
+            <th className="text-right p-3 font-medium">البريد الإلكتروني</th>
             <th className="text-right p-3 font-medium">الهاتف</th>
-            <th className="text-right p-3 font-medium">الشركة / العمر</th>
-            <th className="text-right p-3 font-medium">الجنسية</th>
+            <th className="text-right p-3 font-medium">الميزانية</th>
+            <th className="text-right p-3 font-medium">اسم الشركة</th>
             <th className="text-right p-3 font-medium">نوع الخدمة</th>
             <th className="text-right p-3 font-medium">الرسالة</th>
             <th className="text-right p-3 font-medium">الحالة</th>
@@ -59,17 +70,92 @@ export function LeadsTab() {
         <tbody>
           {leads.map((lead) => (
             <tr key={lead._id} className="border-b" data-testid={`row-lead-${lead._id}`}>
-              <td className="p-3" data-testid={`text-lead-name-${lead._id}`}>{lead.parentName}</td>
+              <td className="p-3" data-testid={`text-lead-name-${lead._id}`}>{lead.clientName}</td>
+              <td className="p-3 text-xs">{lead.email}</td>
               <td className="p-3" data-testid={`text-lead-phone-${lead._id}`}>{lead.phone}</td>
-              <td className="p-3" data-testid={`text-lead-age-${lead._id}`}>{lead.childAge}</td>
-              <td className="p-3">{lead.nationality || "-"}</td>
-              <td className="p-3">{formatSchoolType(lead.schoolType)}</td>
+              <td className="p-3" data-testid={`text-lead-age-${lead._id}`}>{lead.monthlyBudget}</td>
+              <td className="p-3">{lead.companyName || "-"}</td>
+              <td className="p-3">{formatServiceInterest(lead.serviceInterest)}</td>
               <td className="p-3 max-w-[200px] truncate" data-testid={`text-lead-message-${lead._id}`}>{lead.message || "-"}</td>
               <td className="p-3"><LeadStatusBadge status={lead.status} /></td>
               <td className="p-3 text-muted-foreground text-xs" data-testid={`text-lead-date-${lead._id}`}>{formatDate(lead.createdAt)}</td>
               <td className="p-3">
-                <div className="flex gap-1 flex-wrap">
-                  {lead.status !== "contacted" && (
+                  <div className="flex gap-1 flex-wrap">
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => setSelectedLead(lead)}
+                        >
+                          عرض
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-2xl" dir="rtl">
+                        <DialogHeader>
+                          <DialogTitle className="flex items-center gap-2">
+                            <Info className="h-5 w-5 text-accent" />
+                            تفاصيل الرسالة
+                          </DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-6 py-4">
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="p-3 bg-muted/50 rounded-lg">
+                              <div className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
+                                <User className="h-3 w-3" /> الاسم
+                              </div>
+                              <div className="font-bold">{lead.clientName}</div>
+                            </div>
+                            <div className="p-3 bg-muted/50 rounded-lg">
+                              <div className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
+                                <Phone className="h-3 w-3" /> الهاتف
+                              </div>
+                              <div className="font-bold" dir="ltr">{lead.phone}</div>
+                            </div>
+                            <div className="p-3 bg-muted/50 rounded-lg">
+                              <div className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
+                                <Mail className="h-3 w-3" /> البريد
+                              </div>
+                              <div className="font-bold">{lead.email || "-"}</div>
+                            </div>
+                            <div className="p-3 bg-muted/50 rounded-lg">
+                              <div className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
+                                <Building2 className="h-3 w-3" /> الشركة
+                              </div>
+                              <div className="font-bold">{lead.companyName || "-"}</div>
+                            </div>
+                            <div className="p-3 bg-muted/50 rounded-lg">
+                              <div className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
+                                <Wallet className="h-3 w-3" /> الميزانية
+                              </div>
+                              <div className="font-bold">{lead.monthlyBudget}</div>
+                            </div>
+                            <div className="p-3 bg-muted/50 rounded-lg">
+                              <div className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
+                                <Settings className="h-3 w-3" /> الخدمة
+                              </div>
+                              <div className="font-bold">{formatServiceInterest(lead.serviceInterest)}</div>
+                            </div>
+                          </div>
+
+                          <div className="p-4 bg-accent/5 border border-accent/10 rounded-lg">
+                            <div className="text-xs text-muted-foreground mb-2 flex items-center gap-1">
+                              <MessageSquare className="h-3 w-3 text-accent" /> الرسالة
+                            </div>
+                            <div className="text-sm leading-relaxed whitespace-pre-wrap">
+                              {lead.message || "لا توجد رسالة إضافية"}
+                            </div>
+                          </div>
+
+                          <div className="flex justify-between items-center text-xs text-muted-foreground">
+                            <span>تم الإرسال في: {formatDate(lead.createdAt)}</span>
+                            <LeadStatusBadge status={lead.status} />
+                          </div>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+
+                    {lead.status !== "contacted" && (
                     <Button
                       size="sm"
                       variant="outline"

@@ -11,9 +11,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Eye, FileText, Edit3, Save, X, Trash2 } from "lucide-react";
 import { SiWhatsapp } from "react-icons/si";
 import { formatDate } from "../utils/formatters";
-import type { TeacherApplicationType } from "@shared/schema";
+import type { ExpertApplicationType } from "@shared/schema";
 
-function TeacherApplicationStatusBadge({ status }: { status: string | null | undefined }) {
+function ExpertApplicationStatusBadge({ status }: { status: string | null | undefined }) {
   if (status === "new" || !status) {
     return <Badge className="bg-blue-500 text-white no-default-hover-elevate no-default-active-elevate">جديد</Badge>;
   }
@@ -32,23 +32,23 @@ function TeacherApplicationStatusBadge({ status }: { status: string | null | und
   return <Badge>{status}</Badge>;
 }
 
-export function TeacherApplicationsTab() {
+export function ExpertApplicationsTab() {
   const { toast } = useToast();
   const [editingNotes, setEditingNotes] = useState<string | null>(null);
   const [notesText, setNotesText] = useState<string>("");
 
-  const { data: applications = [], isLoading } = useQuery<TeacherApplicationType[]>({
-    queryKey: ["/api/admin/teacher-applications"],
+  const { data: applications = [], isLoading } = useQuery<ExpertApplicationType[]>({
+    queryKey: ["/api/admin/expert-applications"],
     queryFn: async () => {
-      const res = await adminFetch("/api/admin/teacher-applications");
-      if (!res.ok) throw new Error("Failed to fetch teacher applications");
+      const res = await adminFetch("/api/admin/expert-applications");
+      if (!res.ok) throw new Error("Failed to fetch expert applications");
       return res.json();
     },
   });
 
   const updateStatus = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
-      const res = await adminFetch(`/api/admin/teacher-applications/${id}/status`, {
+      const res = await adminFetch(`/api/admin/expert-applications/${id}/status`, {
         method: "PUT",
         body: JSON.stringify({ status }),
       });
@@ -56,7 +56,7 @@ export function TeacherApplicationsTab() {
       return res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/teacher-applications"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/expert-applications"] });
       toast({ title: "تم تحديث الحالة بنجاح" });
     },
     onError: () => {
@@ -66,7 +66,7 @@ export function TeacherApplicationsTab() {
 
   const updateNotes = useMutation({
     mutationFn: async ({ id, notes }: { id: string; notes: string }) => {
-      const res = await adminFetch(`/api/admin/teacher-applications/${id}/notes`, {
+      const res = await adminFetch(`/api/admin/expert-applications/${id}/notes`, {
         method: "PUT",
         body: JSON.stringify({ adminNotes: notes }),
       });
@@ -74,7 +74,7 @@ export function TeacherApplicationsTab() {
       return res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/teacher-applications"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/expert-applications"] });
       setEditingNotes(null);
       setNotesText("");
       toast({ title: "تم تحديث الملاحظات بنجاح" });
@@ -86,14 +86,14 @@ export function TeacherApplicationsTab() {
 
   const deleteApplication = useMutation({
     mutationFn: async (id: string) => {
-      const res = await adminFetch(`/api/admin/teacher-applications/${id}`, {
+      const res = await adminFetch(`/api/admin/expert-applications/${id}`, {
         method: "DELETE",
       });
       if (!res.ok) throw new Error("Failed to delete application");
       return res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/teacher-applications"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/expert-applications"] });
       toast({ title: "تم حذف الطلب بنجاح" });
     },
     onError: () => {
@@ -174,12 +174,12 @@ export function TeacherApplicationsTab() {
                       <div><strong>المؤهل:</strong> {app.education} - {app.specialization}</div>
                       <div><strong>سنوات الخبرة:</strong> {app.experienceYears} سنة</div>
                       <div><strong>الأوقات المتاحة:</strong> {app.availableHours}</div>
-                      {app.teachingPlatforms && (
-                        <div><strong>المنصات التسويقية:</strong> {app.teachingPlatforms}</div>
+                      {app.marketingTools && (
+                        <div><strong>المنصات التسويقية:</strong> {app.marketingTools}</div>
                       )}
-                      <div><strong>خبرة سابقة وعملية:</strong> {app.hasAbacusExperience ? "نعم" : "لا"}</div>
-                      {app.hasAbacusExperience && app.abacusDetails && (
-                        <div><strong>أبرز الإنجازات/الخبرات:</strong> {app.abacusDetails}</div>
+                      <div><strong>خبرة سابقة وعملية:</strong> {app.hasAgencyExperience ? "نعم" : "لا"}</div>
+                      {app.hasAgencyExperience && app.portfolioDetails && (
+                        <div><strong>أبرز الإنجازات/الخبرات:</strong> {app.portfolioDetails}</div>
                       )}
                       {app.motivation && (
                         <div><strong>الدافع للانضمام:</strong><br />{app.motivation}</div>
@@ -191,8 +191,8 @@ export function TeacherApplicationsTab() {
               <td className="p-3">
                 <div className="text-xs">
                   <div>{app.experienceYears} سنة خبرة</div>
-                  <div className={app.hasAbacusExperience ? "text-green-600" : "text-muted-foreground"}>
-                    {app.hasAbacusExperience ? "✓ خبير" : "✗ مبتدئ"}
+                  <div className={app.hasAgencyExperience ? "text-green-600" : "text-muted-foreground"}>
+                    {app.hasAgencyExperience ? "✓ خبير" : "✗ مبتدئ"}
                   </div>
                 </div>
               </td>
@@ -212,7 +212,7 @@ export function TeacherApplicationsTab() {
                 )}
               </td>
               <td className="p-3">
-                <TeacherApplicationStatusBadge status={app.status} />
+                <ExpertApplicationStatusBadge status={app.status} />
               </td>
               <td className="p-3 min-w-[200px]">
                 {editingNotes === app._id ? (

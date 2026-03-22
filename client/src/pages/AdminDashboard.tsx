@@ -4,14 +4,16 @@ import { isAdminLoggedIn, adminLogout, getAdminToken } from "@/lib/admin";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LogOut, MessageSquare, ShoppingCart, CalendarCheck, Settings, Users2, MessageCircle, Ticket } from "lucide-react";
+import { LogOut, MessageSquare, ShoppingCart, CalendarCheck, Settings, Users2, MessageCircle, Ticket, Calendar as CalendarIcon, Clock } from "lucide-react";
 import { LeadsTab } from "@/components/admin/tabs/LeadsTab";
 import { OrdersTab } from "@/components/admin/tabs/OrdersTab";
 import { TrialsTab } from "@/components/admin/tabs/TrialsTab";
 import { TestimonialsTab } from "@/components/admin/tabs/TestimonialsTab";
-import { TeacherApplicationsTab } from "@/components/admin/tabs/TeacherApplicationsTab";
+import { ExpertApplicationsTab } from "@/components/admin/tabs/ExpertApplicationsTab";
 import { CouponsTab } from "@/components/admin/tabs/CouponsTab";
 import { SettingsTab } from "@/components/admin/tabs/SettingsTab";
+import { CalendarTab } from "@/components/admin/tabs/CalendarTab";
+import { BookingPoliciesTab } from "@/components/admin/tabs/BookingPoliciesTab";
 
 const SESSION_CHECK_INTERVAL = 5 * 60 * 1000; // Verify every 5 min
 const INACTIVITY_TIMEOUT = 30 * 60 * 1000; // Auto-logout after 30 min idle
@@ -105,9 +107,9 @@ export default function AdminDashboard() {
               <CalendarCheck className="h-4 w-4" />
               استشارات واجتماعات
             </TabsTrigger>
-            <TabsTrigger value="teachers" data-testid="tab-teachers" className="gap-1">
+            <TabsTrigger value="experts" data-testid="tab-experts" className="gap-1">
               <Users2 className="h-4 w-4" />
-              فريق العمل / مدربين
+              فريق العمل / الخبراء
             </TabsTrigger>
             <TabsTrigger value="testimonials" data-testid="tab-testimonials" className="gap-1">
               <MessageCircle className="h-4 w-4" />
@@ -116,6 +118,14 @@ export default function AdminDashboard() {
             <TabsTrigger value="coupons" data-testid="tab-coupons" className="gap-1">
               <Ticket className="h-4 w-4" />
               كوبونات الخصم
+            </TabsTrigger>
+            <TabsTrigger value="calendar" data-testid="tab-calendar" className="gap-1">
+              <CalendarIcon className="h-4 w-4" />
+              التقويم والمواعيد
+            </TabsTrigger>
+            <TabsTrigger value="policies" data-testid="tab-policies" className="gap-1">
+              <Clock className="h-4 w-4" />
+              سياسات الحجوزات
             </TabsTrigger>
             <TabsTrigger value="settings" data-testid="tab-settings" className="gap-1">
               <Settings className="h-4 w-4" />
@@ -156,13 +166,13 @@ export default function AdminDashboard() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="teachers">
+          <TabsContent value="experts">
             <Card>
               <CardHeader>
                 <CardTitle>طلبات الانضمام للفريق</CardTitle>
               </CardHeader>
               <CardContent>
-                <TeacherApplicationsTab />
+                <ExpertApplicationsTab />
               </CardContent>
             </Card>
           </TabsContent>
@@ -191,6 +201,28 @@ export default function AdminDashboard() {
 
           <TabsContent value="settings">
             <SettingsTab />
+          </TabsContent>
+
+          <TabsContent value="calendar">
+            <Card>
+              <CardHeader>
+                <CardTitle>إدارة مواعيد العمل والتقويم</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CalendarTab />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="policies">
+            <Card>
+              <CardHeader>
+                <CardTitle>سياسة الإلغاء والتعديل</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <BookingPoliciesTab />
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </main>

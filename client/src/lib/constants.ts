@@ -137,10 +137,10 @@ export const SKILLS_GRID = [
   },
 ];
 
-export const SUBJECTS = [
-  { title: "subjects.fb_insta", grade: "subjects.fb_insta_level" },
-  { title: "subjects.google", grade: "subjects.google_level" },
-  { title: "subjects.content", grade: "subjects.content_level" },
-  { title: "subjects.email", grade: "subjects.email_level" },
+export const SERVICES = [
+  { title: { ar: "إدارة الحملات الإعلانية", en: "Ad Campaign Management" }, icon: "BarChart3" },
+  { title: { ar: "تحسين محركات البحث SEO", en: "Search Engine Optimization" }, icon: "Search" },
+  { title: { ar: "صناعة المحتوى", en: "Content Creation" }, icon: "PenTool" },
+  { title: { ar: "هوية بصرية وبراندينج", en: "Visual Identity & Branding" }, icon: "Palette" },
 ];
 

@@ -7,7 +7,9 @@ import { Card } from "@/components/ui/card";
 import { fadeInUp, staggerContainer } from "@/lib/animations";
 import { useLanguage } from "@/hooks/use-language";
 
-const getSections = (t: any) => [
+import { useQuery } from "@tanstack/react-query";
+
+const getSections = (t: any, settings: any) => [
   {
     title: t({ ar: "القبول بالشروط", en: "Acceptance of Terms" }),
     content: t({
@@ -39,8 +41,8 @@ const getSections = (t: any) => [
   {
     title: t({ ar: "سياسة الاسترداد وإلغاء التعاقد", en: "Refund Policy and Contract Cancellation" }),
     content: t({
-      ar: "تخضع سياسات الاسترداد لشروط كل عقد على حدة. للمشتركين في الخدمات الاستشارية والرقمية المباعة أونلاين عبر الموقع تخضع الشروط لضمان الرضا (إذا تم ذكره صراحة) وإلا فالقاعدة الأساسية تعتمد على بنود التعاقد المبرم.",
-      en: "Refund policies are subject to the terms of each individual contract. For consulting services and digital products sold online, our satisfaction guarantee applies (if explicitly stated), otherwise, the general rule depends on the signed contract terms."
+      ar: `تخضع سياسات الاسترداد لشروط كل عقد على حدة. يمكنك إلغاء الطلب خلال ${settings?.cancelDeadlineHours || 48} ساعة من تاريخ الشراء، كما يمكن تعديل تفاصيل الحجز حتى ${settings?.editDeadlineHours || 24} ساعة قبل الموعد المحدد.`,
+      en: `Refund policies are subject to the terms of each individual contract. You can cancel your order within ${settings?.cancelDeadlineHours || 48} hours of purchase, and booking details can be modified up to ${settings?.editDeadlineHours || 24} hours before the scheduled time.`
     }),
   },
   {
@@ -75,7 +77,21 @@ const getSections = (t: any) => [
 
 export default function Terms() {
   const { t, language } = useLanguage();
-  const currentSections = getSections(t);
+  const { data: settingsData } = useQuery({
+    queryKey: ["/api/settings"],
+    queryFn: async () => {
+      const res = await fetch("/api/settings");
+      if (!res.ok) throw new Error("Failed to fetch settings");
+      return res.json();
+    },
+  });
+
+  const bookingPolicies = settingsData?.booking_policies || {
+    cancelDeadlineHours: 48,
+    editDeadlineHours: 24
+  };
+
+  const currentSections = getSections(t, bookingPolicies);
 
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
@@ -113,7 +129,7 @@ export default function Terms() {
             {t({ ar: "شروط وأحكام استخدام خدمات وكالة ماركتير برو", en: "Terms and conditions for using Marketer Pro agency services" })}
           </motion.p>
           <motion.p variants={fadeInUp} className="mt-2 text-muted-foreground text-sm">
-            {t({ ar: "آخر تحديث: فبراير 2026", en: "Last Updated: February 2026" })}
+            {t({ ar: "آخر تحديث: مارس 2026", en: "Last Updated: March 2026" })}
           </motion.p>
         </motion.div>
 

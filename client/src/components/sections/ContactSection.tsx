@@ -8,40 +8,99 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Send, MessageCircle, Phone, CheckCircle } from "lucide-react";
 import { SiWhatsapp } from "react-icons/si";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { fadeInUp, fadeInRight, fadeInLeft, staggerContainer, viewportConfig } from "@/lib/animations";
 import { useLanguage } from "@/hooks/use-language";
+import { usePublicSettings } from "@/hooks/use-public-settings";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from "date-fns";
+import { ar } from "date-fns/locale";
+import { Info, Calendar as CalendarIcon, Clock, MessageSquare as MessageIcon } from "lucide-react";
+import type { AvailabilitySlotType } from "@shared/schema";
+import { useAuth } from "@/hooks/use-auth";
+import { useEffect } from "react";
 
 export default function ContactSection() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { toast } = useToast();
+  const { data: publicSettings } = usePublicSettings();
+  const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState("consultation");
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
+    email: "",
     company: "",
     service: "",
     message: "",
+    scheduledDate: undefined as Date | undefined,
+    scheduledSlotId: "",
   });
+
+  // Auto-populate from user profile
+  useEffect(() => {
+    if (user) {
+      setFormData(prev => ({
+        ...prev,
+        name: prev.name || user.name || "",
+        phone: prev.phone || user.phone || "",
+        email: prev.email || user.email || "",
+      }));
+    }
+  }, [user]);
+
   const [submitted, setSubmitted] = useState(false);
+
+  // Fetch slots for selected date
+  const { data: slots = [], isLoading: isLoadingSlots } = useQuery<AvailabilitySlotType[]>({
+    queryKey: ["/api/availability/active", formData.scheduledDate ? format(formData.scheduledDate, "yyyy-MM-dd") : null],
+    queryFn: async () => {
+      if (!formData.scheduledDate) return [];
+      const res = await fetch(`/api/availability/active?date=${format(formData.scheduledDate, "yyyy-MM-dd")}`);
+      if (!res.ok) return [];
+      return res.json();
+    },
+    enabled: !!formData.scheduledDate,
+  });
 
   const mutation = useMutation({
     mutationFn: async (data: typeof formData) => {
-      return apiRequest("POST", "/api/leads", {
-        parentName: data.name,
-        phone: data.phone,
-        childAge: 0,
-        schoolType: data.service || undefined,
-        message: `${data.company ? `الشركة: ${data.company}\n` : ""}${data.message || ""}`,
-        source: "website",
-      });
+      // If we have a slot, it's a Trial Booking. Otherwise, it's a Lead.
+      const isTrial = !!data.scheduledSlotId;
+      const endpoint = isTrial ? "/api/trial-bookings" : "/api/leads";
+      
+      const payload = isTrial 
+        ? {
+            clientName: data.name,
+            phone: data.phone,
+            email: data.email,
+            companyName: data.company || "",
+            serviceInterest: data.service || "consultation",
+            message: data.message || "",
+            scheduledSlotId: data.scheduledSlotId,
+          }
+        : {
+            clientName: data.name,
+            phone: data.phone,
+            email: data.email,
+            companyName: data.company || "",
+            serviceInterest: data.service || "inquiry",
+            message: data.message || "",
+          };
+
+      return apiRequest("POST", endpoint, payload);
     },
     onSuccess: () => {
       setSubmitted(true);
       toast({
         title: t({ ar: "تم الإرسال بنجاح!", en: "Sent Successfully!" }),
-        description: t({ ar: "سنتواصل معك قريباً إن شاء الله", en: "We will contact you shortly, God willing" }),
+        description: t({ 
+          ar: formData.scheduledSlotId ? "تم حجز موعد الاستشارة، سنتواصل معك قريباً" : "شكراً لتواصلك معنا، سنرد على استفسارك قريباً", 
+          en: formData.scheduledSlotId ? "Consultation booked, we will contact you shortly" : "Thank you for contacting us, we will reply to your inquiry shortly"
+        }),
       });
     },
     onError: () => {
@@ -55,7 +114,18 @@ export default function ContactSection() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name || !formData.phone) return;
+    if (!formData.name || !formData.phone || !formData.email) {
+      toast({
+        title: t({ ar: "بيانات ناقصة", en: "Missing Data" }),
+        description: t({ ar: "يرجى إكمال الحقول المطلوبة", en: "Please fill in all required fields" }),
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // In consultation mode, we suggest picking a date, but allow it to be optional as per user request
+    // However, the UI makes it clear that picking a date is for "Consultation"
+    
     mutation.mutate(formData);
   };
 
@@ -128,7 +198,7 @@ export default function ContactSection() {
                       variant="outline"
                       onClick={() => {
                         setSubmitted(false);
-                        setFormData({ name: "", phone: "", company: "", service: "", message: "" });
+                        setFormData({ name: "", phone: "", email: "", company: "", service: "", message: "", scheduledDate: undefined, scheduledSlotId: "" });
                       }}
                       data-testid="button-register-another"
                     >
@@ -144,99 +214,240 @@ export default function ContactSection() {
                   exit={{ opacity: 0, y: -20 }}
                 >
                   <Card className="p-6 sm:p-8 border border-card-border" data-testid="card-contact-form">
-                    <h3 className="text-lg font-bold text-foreground mb-6 flex items-center gap-2">
-                      <MessageCircle className="h-5 w-5 text-accent" />
-                      {t({ ar: "احجز استشارة مجانية", en: "Book a Free Consultation" })}
-                    </h3>
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
+                      <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
+                        <MessageCircle className="h-5 w-5 text-accent" />
+                        {activeTab === "consultation" 
+                          ? t({ ar: "احجز استشارة مجانية", en: "Book a Free Consultation" })
+                          : t({ ar: "إرسال استفسار / شكوى", en: "Send Inquiry / Message" })
+                        }
+                      </h3>
+                      
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-8 px-3 text-[11px] gap-1.5 border-accent/20 hover:border-accent hover:bg-accent/5 transition-all duration-300 rounded-full"
+                        onClick={() => {
+                          const next = activeTab === "consultation" ? "lead" : "consultation";
+                          setActiveTab(next);
+                          if (next === "lead") {
+                            setFormData(p => ({ ...p, scheduledSlotId: "", scheduledDate: undefined }));
+                          }
+                        }}
+                      >
+                        <CalendarIcon className="h-3.5 w-3.5 text-accent" />
+                        <span className="text-muted-foreground">
+                          {activeTab === "consultation" 
+                            ? t({ ar: "التبديل للاستفسارات", en: "Switch to Inquiries" })
+                            : t({ ar: "التبديل للاستشارات", en: "Switch to Consultations" })
+                          }
+                        </span>
+                      </Button>
+                    </div>
 
                     <form onSubmit={handleSubmit} className="space-y-5">
-                      <div className="space-y-2">
-                        <Label htmlFor="parentName">{t({ ar: "الاسم بالكامل", en: "Full Name" })}</Label>
-                        <Input
-                          id="parentName"
-                          placeholder={t({ ar: "مثال: أحمد محمد", en: "e.g., Ahmed Mohamed" })}
-                          value={formData.name}
-                          onChange={(e) => setFormData((p) => ({ ...p, name: e.target.value }))}
-                          required
-                          data-testid="input-parent-name"
-                        />
-                      </div>
+                        <div className="grid md:grid-cols-2 gap-5">
+                          <div className="space-y-2">
+                            <Label htmlFor="clientName">{t({ ar: "الاسم بالكامل", en: "Full Name" })}</Label>
+                            <Input
+                              id="clientName"
+                              placeholder={t({ ar: "مثال: أحمد محمد", en: "e.g., Ahmed Mohamed" })}
+                              value={formData.name}
+                              onChange={(e) => setFormData((p) => ({ ...p, name: e.target.value }))}
+                              required
+                              data-testid="input-parent-name"
+                            />
+                          </div>
 
-                      <div className="space-y-2">
-                        <Label htmlFor="phone">{t({ ar: "رقم الهاتف / واتساب", en: "Phone Number / WhatsApp" })}</Label>
-                        <Input
-                          id="phone"
-                          type="tel"
-                          placeholder="01xxxxxxxxx"
-                          value={formData.phone}
-                          onChange={(e) => setFormData((p) => ({ ...p, phone: e.target.value }))}
-                          required
-                          dir="ltr"
-                          data-testid="input-phone"
-                        />
-                      </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="phone">{t({ ar: "رقم الهاتف / واتساب", en: "Phone Number / WhatsApp" })}</Label>
+                            <Input
+                              id="phone"
+                              type="tel"
+                              placeholder="01xxxxxxxxx"
+                              value={formData.phone}
+                              onChange={(e) => setFormData((p) => ({ ...p, phone: e.target.value }))}
+                              required
+                              dir="ltr"
+                              data-testid="input-phone"
+                            />
+                          </div>
+                        </div>
 
-                      <div className="space-y-2">
-                        <Label htmlFor="company">{t({ ar: "الشركة / المشروع (اختياري)", en: "Company / Project (Optional)" })}</Label>
-                        <Input
-                          id="company"
-                          placeholder={t({ ar: "اسم شركتك أو مشروعك", en: "Your company or project name" })}
-                          value={formData.company}
-                          onChange={(e) => setFormData((p) => ({ ...p, company: e.target.value }))}
-                          data-testid="input-company"
-                        />
-                      </div>
+                        <div className="grid md:grid-cols-2 gap-5">
+                          <div className="space-y-2">
+                            <Label htmlFor="email">{t({ ar: "البريد الإلكتروني", en: "Email Address" })}</Label>
+                            <Input
+                              id="email"
+                              type="email"
+                              placeholder="your@email.com"
+                              value={formData.email}
+                              onChange={(e) => setFormData((p) => ({ ...p, email: e.target.value }))}
+                              required
+                              dir="ltr"
+                              data-testid="input-email"
+                            />
+                          </div>
 
-                      <div className="space-y-2">
-                        <Label>{t({ ar: "نوع الخدمة المطلوبة", en: "Required Service Type" })}</Label>
-                        <Select
-                          value={formData.service}
-                          onValueChange={(v) => setFormData((p) => ({ ...p, service: v }))}
-                        >
-                          <SelectTrigger data-testid="select-school-type">
-                            <SelectValue placeholder={t({ ar: "اختر الخدمة", en: "Select Service" })} />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="marketing">{t({ ar: "إدارة حملات تسويقية", en: "Marketing Campaigns Management" })}</SelectItem>
-                            <SelectItem value="consultation">{t({ ar: "استشارة تسويقية", en: "Marketing Consultation" })}</SelectItem>
-                            <SelectItem value="training">{t({ ar: "تدريب وكورسات", en: "Training and Courses" })}</SelectItem>
-                            <SelectItem value="other">{t({ ar: "أخرى", en: "Other" })}</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="company">{t({ ar: "الشركة / المشروع (اختياري)", en: "Company / Project (Optional)" })}</Label>
+                            <Input
+                              id="company"
+                              placeholder={t({ ar: "اسم شركتك أو مشروعك", en: "Your company or project name" })}
+                              value={formData.company}
+                              onChange={(e) => setFormData((p) => ({ ...p, company: e.target.value }))}
+                              data-testid="input-company"
+                            />
+                          </div>
+                        </div>
 
-                      <div className="space-y-2">
-                        <Label htmlFor="message">{t({ ar: "تفاصيل إضافية (اختياري)", en: "Additional Details (Optional)" })}</Label>
-                        <Textarea
-                          id="message"
-                          placeholder={t({ ar: "أخبرنا المزيد عن أهدافك أو استفسارك...", en: "Tell us more about your goals or inquiry..." })}
-                          value={formData.message}
-                          onChange={(e) => setFormData((p) => ({ ...p, message: e.target.value }))}
-                          className="resize-none"
-                          rows={3}
-                          data-testid="input-message"
-                        />
-                      </div>
+                        {activeTab === "consultation" && (
+                          <div className="space-y-5 mt-0 animate-in fade-in slide-in-from-top-1">
+                            <div className="space-y-2">
+                              <Label>{t({ ar: "نوع الخدمة المطلوبة", en: "Required Service Type" })}</Label>
+                              <Select
+                                value={formData.service}
+                                onValueChange={(v) => setFormData((p) => ({ ...p, service: v }))}
+                              >
+                                <SelectTrigger data-testid="select-service-type">
+                                  <SelectValue placeholder={t({ ar: "اختر الخدمة", en: "Select Service" })} />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {publicSettings?.services && publicSettings.services.length > 0 ? (
+                                    publicSettings.services.map((s: any, idx: number) => (
+                                      <SelectItem key={idx} value={s.title.en || s.title.ar}>
+                                        {language === "ar" ? s.title.ar : s.title.en}
+                                      </SelectItem>
+                                    ))
+                                  ) : (
+                                    <>
+                                      <SelectItem value="consultation">{t({ ar: "استشارة تسويقية", en: "Marketing Consultation" })}</SelectItem>
+                                      <SelectItem value="branding">{t({ ar: "بناء الهوية التجارية", en: "Branding" })}</SelectItem>
+                                      <SelectItem value="ads">{t({ ar: "إدارة الحملات الإعلانية", en: "Ads Management" })}</SelectItem>
+                                      <SelectItem value="social_media">{t({ ar: "إدارة منصات التواصل", en: "Social Media Management" })}</SelectItem>
+                                      <SelectItem value="seo">{t({ ar: "تحسين محركات البحث", en: "SEO" })}</SelectItem>
+                                      <SelectItem value="strategy">{t({ ar: "تخطيط واستراتيجية", en: "Strategy & Planning" })}</SelectItem>
+                                      <SelectItem value="other">{t({ ar: "أخرى", en: "Other" })}</SelectItem>
+                                    </>
+                                  )}
+                                </SelectContent>
+                              </Select>
+                            </div>
 
-                      <div>
-                        <Button
-                          type="submit"
-                          className="w-full bg-accent text-accent-foreground border-accent-border"
-                          size="lg"
-                          disabled={mutation.isPending}
-                          data-testid="button-submit-lead"
-                        >
-                          {mutation.isPending ? (
-                            t({ ar: "جارٍ الإرسال...", en: "Sending..." })
-                          ) : (
-                            <>
-                              <Send className="mx-2 h-4 w-4 rtl:rotate-180 rotate-0" />
-                              {t({ ar: "سجّل الآن", en: "Register Now" })}
-                            </>
-                          )}
-                        </Button>
-                      </div>
-                    </form>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                              <div className="space-y-2">
+                                <Label>{t({ ar: "تاريخ الاستشارة (اختياري)", en: "Consultation Date (Optional)" })}</Label>
+                                <Popover>
+                                  <PopoverTrigger asChild>
+                                    <Button
+                                      variant={"outline"}
+                                      className={`w-full justify-start text-right font-normal ${!formData.scheduledDate && "text-muted-foreground"}`}
+                                    >
+                                      <CalendarIcon className="ml-2 h-4 w-4" />
+                                      {formData.scheduledDate ? format(formData.scheduledDate, "PPP", { locale: ar }) : t({ ar: "اختر التاريخ", en: "Pick a date" })}
+                                    </Button>
+                                  </PopoverTrigger>
+                                  <PopoverContent className="w-auto p-0" align="start">
+                                    <Calendar
+                                      mode="single"
+                                      selected={formData.scheduledDate}
+                                      onSelect={(date) => {
+                                        setFormData(p => ({ ...p, scheduledDate: date, scheduledSlotId: "" }));
+                                      }}
+                                      disabled={(date) => {
+                                        const today = new Date();
+                                        today.setHours(0, 0, 0, 0);
+                                        const thirtyDaysFromNow = new Date();
+                                        thirtyDaysFromNow.setDate(today.getDate() + 30);
+                                        return date < today || date > thirtyDaysFromNow;
+                                      }}
+                                      initialFocus
+                                    />
+                                  </PopoverContent>
+                                </Popover>
+                              </div>
+
+                              <div className="space-y-2">
+                                <Label>{t({ ar: "وقت الاستشارة", en: "Consultation Time" })}</Label>
+                                <Select
+                                  value={formData.scheduledSlotId}
+                                  onValueChange={(v) => setFormData(p => ({ ...p, scheduledSlotId: v }))}
+                                  disabled={!formData.scheduledDate || isLoadingSlots}
+                                >
+                                  <SelectTrigger>
+                                    <SelectValue placeholder={
+                                      !formData.scheduledDate 
+                                        ? t({ ar: "اختر التاريخ أولاً", en: "Pick date first" })
+                                        : isLoadingSlots 
+                                          ? t({ ar: "جاري التحميل...", en: "Loading..." })
+                                          : t({ ar: "اختر الوقت", en: "Select Time" })
+                                    } />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {slots.length === 0 && formData.scheduledDate && !isLoadingSlots ? (
+                                      <div className="p-2 text-xs text-center text-muted-foreground">
+                                        {t({ ar: "لا توجد مواعيد متاحة هذا اليوم", en: "No available slots for this day" })}
+                                      </div>
+                                    ) : (
+                                      slots.map((slot: any) => (
+                                        <SelectItem key={slot._id} value={slot._id}>
+                                          <div className="flex items-center gap-2">
+                                            <Clock className="h-3 w-3" />
+                                            <span>{slot.startTime} - {slot.endTime}</span>
+                                          </div>
+                                        </SelectItem>
+                                      ))
+                                    )}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        <div className="space-y-2">
+                          <Label htmlFor="message">
+                            {activeTab === "consultation" 
+                              ? t({ ar: "تفاصيل الجلسة (اختياري)", en: "Session Details (Optional)" })
+                              : t({ ar: "موضوع الاستفسار أو الشكوى", en: "Inquiry or Complaint Subject" })
+                            }
+                          </Label>
+                          <Textarea
+                            id="message"
+                            placeholder={activeTab === "consultation"
+                              ? t({ ar: "أخبرنا المزيد عن أهدافك أو ما تود مناقشته...", en: "Tell us more about your goals or what you'd like to discuss..." })
+                              : t({ ar: "اكتب رسالتك هنا بالتفصيل وسنقوم بالرد عليك في أقرب وقت...", en: "Write your message here in detail and we will respond to you as soon as possible..." })
+                            }
+                            value={formData.message}
+                            onChange={(e) => setFormData((p) => ({ ...p, message: e.target.value }))}
+                            className="resize-none"
+                            rows={4}
+                            data-testid="input-message"
+                          />
+                        </div>
+
+                        <div>
+                          <Button
+                            type="submit"
+                            className="w-full bg-accent text-accent-foreground border-accent-border"
+                            size="lg"
+                            disabled={mutation.isPending}
+                            data-testid="button-submit-lead"
+                          >
+                            {mutation.isPending ? (
+                              t({ ar: "جارٍ الإرسال...", en: "Sending..." })
+                            ) : (
+                              <>
+                                <Send className="mx-2 h-4 w-4 rtl:rotate-180 rotate-0" />
+                                {activeTab === "consultation" 
+                                  ? t({ ar: "حجز الموعد الآن", en: "Book Appointment Now" })
+                                  : t({ ar: "إرسال الرسالة", en: "Send Message" })
+                                }
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                      </form>
                   </Card>
                 </motion.div>
               )}
@@ -266,7 +477,7 @@ export default function ContactSection() {
                 <Button
                   variant="outline"
                   className="w-full"
-                  onClick={() => window.open("https://wa.me/201007673634", "_blank")}
+                  onClick={() => window.open("https://wa.me/201553145631", "_blank")}
                   data-testid="button-whatsapp"
                 >
                   <SiWhatsapp className="mx-2 h-4 w-4 text-emerald-500" />
@@ -287,7 +498,7 @@ export default function ContactSection() {
                   </div>
                 </div>
                 <p className="text-lg font-bold text-foreground text-center" dir="ltr" data-testid="text-phone-number">
-                  +201007673634
+                  +201553145631
                 </p>
               </Card>
             </motion.div>

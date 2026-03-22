@@ -8,13 +8,28 @@ import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus, Trash2, GripVertical, Star, Link2, HelpCircle, BarChart3, UserCircle, BookOpen, AlertTriangle, Images } from "lucide-react";
+import { Plus, Trash2, GripVertical, Star, Link2, HelpCircle, BarChart3, UserCircle, BookOpen, AlertTriangle, Images, RefreshCw, Eye, EyeOff, Lock, Calculator } from "lucide-react";
 import { SOCIAL_FIELDS, type SocialData } from "../settings/constants";
 import type { SiteSettingType } from "@shared/schema";
+import { HeroSection } from "../settings/SettingsTabs/HeroSection";
+import { InstructorSection } from "../settings/SettingsTabs/InstructorSection";
+import { WhySection } from "../settings/SettingsTabs/WhySection";
+import { ProgramsSection } from "../settings/SettingsTabs/ProgramsSection";
+import { GallerySection } from "../settings/SettingsTabs/GallerySection";
+import { PricingSection } from "../settings/SettingsTabs/PricingSection";
+import { SocialSection } from "../settings/SettingsTabs/SocialSection";
+import { FaqSection } from "../settings/SettingsTabs/FaqSection";
+import { StatsSection } from "../settings/SettingsTabs/StatsSection";
+import { EventSection } from "../settings/SettingsTabs/EventSection";
+import { SkillsSection } from "../settings/SettingsTabs/SkillsSection";
+import { ServicesSection } from "../settings/SettingsTabs/ServicesSection";
+import { EmpowerSection } from "../settings/SettingsTabs/EmpowerSection";
+import { HubSpotSection } from "../settings/SettingsTabs/HubSpotSection";
+import { CommunicationSection } from "../settings/SettingsTabs/CommunicationSection";
+import { WHY_CARDS, PROGRAMS, PRICING_PLANS, STATS, SERVICES } from "@/lib/constants";
 import { BilingualInput, type BilingualText } from "../settings/BilingualInput";
 import { BilingualTextarea } from "../settings/BilingualTextarea";
 import { ImageUploadInput } from "../settings/ImageUploadInput";
-import { WHY_CARDS, PROGRAMS, PRICING_PLANS, STATS, SUBJECTS } from "@/lib/constants";
 import heroImage1 from "@assets/images/marketing_hero_1_1773563925795.png";
 import heroImage2 from "@assets/images/marketing_hero_2_1773563941883.png";
 import heroImage3 from "@assets/images/marketing_hero_3_1773563957738.png";
@@ -53,9 +68,18 @@ export function SettingsTab() {
   const [galleryCards, setGalleryCards] = useState<any[]>([]);
   const [upcomingEvent, setUpcomingEvent] = useState<any>({ visible: false });
   const [skillsCards, setSkillsCards] = useState<any[]>([]);
-  const [subjects, setSubjects] = useState<any[]>([]);
+  const [services, setServices] = useState<any[]>([]);
   const [empowerSection, setEmpowerSection] = useState<any>({ stats: [] });
   const [heroSlides, setHeroSlides] = useState<any[]>([]);
+  const [hubspotToken, setHubspotToken] = useState("");
+  const [showToken, setShowToken] = useState(false);
+  const [smtpHost, setSmtpHost] = useState("");
+  const [smtpPort, setSmtpPort] = useState("");
+  const [smtpUser, setSmtpUser] = useState("");
+  const [smtpPass, setSmtpPass] = useState("");
+  const [senderEmail, setSenderEmail] = useState("");
+  const [showPass, setShowPass] = useState(false);
+  const [syncPreview, setSyncPreview] = useState<{ leads: number, trials: number, orders: number } | null>(null);
 
   // --- DEFAULT VALUES ---
   const defaultInstructor = {
@@ -230,7 +254,7 @@ export function SettingsTab() {
     const loadedPlans = getSetting("plans");
     setPlans(loadedPlans?.length ? loadedPlans : PRICING_PLANS);
     
-    setWhatsapp(getSetting("contact")?.whatsapp || "+201007673634");
+    setWhatsapp(getSetting("contact")?.whatsapp || "+201553145631");
     setInstapay(getSetting("contact")?.instapay || "instapay@example");
     
     const loadedSocial = getSetting("social");
@@ -258,15 +282,21 @@ export function SettingsTab() {
     const loadedSkills = getSetting("skills_cards");
     setSkillsCards(loadedSkills?.length ? loadedSkills : defaultSkills);
     
-    const loadedSubjects = getSetting("subjects");
-    setSubjects(loadedSubjects?.length ? loadedSubjects : SUBJECTS);
+    const loadedServices = getSetting("services") || getSetting("subjects");
+    setServices(loadedServices?.length ? loadedServices : SERVICES);
     
     setEmpowerSection(getSetting("empower_section") || defaultEmpower);
     
     const loadedHero = getSetting("hero_slides");
     setHeroSlides(loadedHero?.length ? loadedHero : defaultHero);
 
-  }, [isLoading, settings]);
+    setHubspotToken(getSetting("HUBSPOT_ACCESS_TOKEN") || "");
+    setSmtpHost(getSetting("SMTP_HOST") || "smtp-relay.brevo.com");
+    setSmtpPort(getSetting("SMTP_PORT") || "587");
+    setSmtpUser(getSetting("SMTP_USER") || "");
+    setSmtpPass(getSetting("SMTP_PASS") || "");
+    setSenderEmail(getSetting("SENDER_EMAIL") || "noreply@marketerpro.com");
+  }, [isLoading, rawSettings]);
 
   // --- SAVING LOGIC ---
   const saveSetting = useMutation({
@@ -290,470 +320,94 @@ export function SettingsTab() {
 
   const handleSave = (key: string, value: any) => saveSetting.mutate({ key, value });
 
+  const syncHubSpotMutation = useMutation({
+    mutationFn: async () => {
+      const res = await adminFetch("/api/admin/hubspot/sync-all", {
+        method: "POST"
+      });
+      if (!res.ok) throw new Error("Failed to sync HubSpot");
+      return res.json();
+    },
+    onSuccess: (data) => {
+      toast({ 
+        title: "تم بدء المزامنة", 
+        description: data.message || "جاري تحديث البيانات في HubSpot..." 
+      });
+    },
+    onError: (err: any) => {
+      toast({ title: "خطأ في المزامنة", description: err.message, variant: "destructive" });
+    }
+  });
+
+  const fetchPreviewMutation = useMutation({
+    mutationFn: async () => {
+      const res = await adminFetch("/api/admin/hubspot/preview");
+      if (!res.ok) throw new Error("Failed to fetch preview");
+      return res.json();
+    },
+    onSuccess: (data) => {
+      setSyncPreview(data);
+      toast({ title: "تم جلب بيانات المعاينة بنجاح" });
+    },
+    onError: () => {
+      toast({ title: "خطأ", description: "فشل في جلب بيانات المعاينة", variant: "destructive" });
+    }
+  });
+
   if (isLoading) return <div className="p-8 text-center text-muted-foreground">جاري التحميل...</div>;
 
   return (
     <div className="max-w-5xl mx-auto pb-24">
       <Accordion type="multiple" className="w-full space-y-6">
-      {/* 1. Hero Slides */}
-      <AccordionItem value="item-1HeroSlides" className="bg-card border shadow-sm rounded-lg overflow-hidden">
-        <AccordionTrigger className="px-6 py-4 hover:no-underline hover:bg-muted/50 transition-colors">
-          <div className="flex-1 text-start">
-            <CardHeader className="  flex flex-row items-center justify-between">
+        <HeroSection heroSlides={heroSlides} setHeroSlides={setHeroSlides} handleSave={handleSave} isSaving={saveSetting.isPending} />
 
-          <CardTitle className="flex items-center gap-2"><Images className="h-5 w-5"/> شرائح قسم البداية (Hero)</CardTitle>
-          <Button variant="outline" size="sm" onClick={() => setHeroSlides(p => [...p, { title: {ar:"", en:""}, highlight: {ar:"", en:""}, subtitle: {ar:"", en:""}, mediaUrl: "" }])}>
-            <Plus className="h-4 w-4 ml-1" /> إضافة شريحة
-          </Button>
-        
-            </CardHeader>
-          </div>
-        </AccordionTrigger>
-        <AccordionContent>
-          <CardContent className="space-y-6">
+        <InstructorSection instructorData={instructorData} setInstructorData={setInstructorData} handleSave={handleSave} isSaving={saveSetting.isPending} />
 
-          {heroSlides.map((slide, i) => (
-            <div key={i} className="border p-4 rounded-lg bg-card/50 space-y-4">
-              <div className="flex justify-between items-center mb-2">
-                <span className="font-bold">شريحة {i + 1}</span>
-                <Button variant="ghost" size="icon" onClick={() => setHeroSlides(p => p.filter((_, idx) => idx !== i))}><Trash2 className="h-4 w-4 text-destructive"/></Button>
-              </div>
-              <BilingualInput label="العنوان الرئيسي" value={slide.title} onChange={v => setHeroSlides(p => p.map((s, idx) => idx === i ? {...s, title: v} : s))} />
-              <BilingualInput label="الكلمة المميزة (التي تظهر بلون مختلف)" value={slide.highlight} onChange={v => setHeroSlides(p => p.map((s, idx) => idx === i ? {...s, highlight: v} : s))} />
-              <BilingualTextarea label="العنوان الفرعي" value={slide.subtitle} onChange={v => setHeroSlides(p => p.map((s, idx) => idx === i ? {...s, subtitle: v} : s))} />
-              <div className="pt-2">
-                <ImageUploadInput label="صورة/فيديو الشريحة" value={slide.mediaUrl} onChange={url => setHeroSlides(p => p.map((s, idx) => idx === i ? {...s, mediaUrl: url} : s))} />
-              </div>
-            </div>
-          ))}
-          <Button className="w-full" onClick={() => handleSave("hero_slides", heroSlides)} disabled={saveSetting.isPending}>حفظ التعديلات</Button>
-        
-          </CardContent>
-        </AccordionContent>
-      </AccordionItem>
+        <WhySection whyCards={whyCards} setWhyCards={setWhyCards} handleSave={handleSave} isSaving={saveSetting.isPending} />
+        <ProgramsSection programsData={programsData} setProgramsData={setProgramsData} handleSave={handleSave} isSaving={saveSetting.isPending} />
 
-      {/* 2. Instructor Details */}
-      <AccordionItem value="item-2InstructorDeta" className="bg-card border shadow-sm rounded-lg overflow-hidden">
-        <AccordionTrigger className="px-6 py-4 hover:no-underline hover:bg-muted/50 transition-colors">
-          <div className="flex-1 text-start">
-            <CardHeader className="  flex flex-row items-center justify-between">
+        <GallerySection galleryCards={galleryCards} setGalleryCards={setGalleryCards} handleSave={handleSave} isSaving={saveSetting.isPending} />
+        <PricingSection plans={plans} setPlans={setPlans} handleSave={handleSave} isSaving={saveSetting.isPending} />
 
-          <CardTitle className="flex items-center gap-2"><UserCircle className="h-5 w-5"/> ملف المدرب (Instructor)</CardTitle>
-        
-            </CardHeader>
-          </div>
-        </AccordionTrigger>
-        <AccordionContent>
-          <CardContent className="space-y-6">
+        <SocialSection social={social} setSocial={setSocial} whatsapp={whatsapp} setWhatsapp={setWhatsapp} instapay={instapay} setInstapay={setInstapay} handleSave={handleSave} isSaving={saveSetting.isPending} />
 
-          <ImageUploadInput label="صورة المدرب الشخصية" value={instructorData.image} onChange={url => setInstructorData((p:any) => ({...p, image: url}))} />
-          <BilingualInput label="الشارة (Badge)" value={instructorData.badge} onChange={v => setInstructorData((p:any) => ({...p, badge: v}))} />
-          <BilingualInput label="اسم المدرب" value={instructorData.name} onChange={v => setInstructorData((p:any) => ({...p, name: v}))} />
-          <BilingualInput label="المسمى الوظيفي" value={instructorData.title} onChange={v => setInstructorData((p:any) => ({...p, title: v}))} />
-          <BilingualTextarea label="نبذة تعريفية" value={instructorData.bio} onChange={v => setInstructorData((p:any) => ({...p, bio: v}))} />
-          <BilingualInput label="اقتباس مأثور" value={instructorData.quote} onChange={v => setInstructorData((p:any) => ({...p, quote: v}))} />
-          
-          <div className="space-y-3 pt-4 border-t">
-            <div className="flex justify-between items-center">
-              <Label className="font-bold">الإنجازات المرفقة (شريطان بجوار الصورة)</Label>
-              <Button size="sm" variant="outline" onClick={() => setInstructorData((p:any) => ({...p, achievements: [...(p.achievements||[]), {label: {ar:"", en:""}, color: "text-blue-500"}]}))}>
-                <Plus className="h-4 w-4" />
-              </Button>
-            </div>
-            {instructorData.achievements?.map((a:any, i:number) => (
-              <div key={i} className="flex gap-2 items-start border p-3 rounded-md bg-muted/10">
-                <div className="flex-1">
-                  <BilingualInput label={`إنجاز ${i+1}`} value={a.label} onChange={v => setInstructorData((p:any) => { const ach = [...p.achievements]; ach[i].label = v; return {...p, achievements: ach}; })} />
-                </div>
-                <Button variant="ghost" size="icon" className="mt-8" onClick={() => setInstructorData((p:any) => ({...p, achievements: p.achievements.filter((_:any, idx:number) => idx !== i)}))}><Trash2 className="h-4 w-4" /></Button>
-              </div>
-            ))}
-          </div>
-          <Button className="w-full" onClick={() => handleSave("instructor", instructorData)} disabled={saveSetting.isPending}>حفظ التعديلات</Button>
-        
-          </CardContent>
-        </AccordionContent>
-      </AccordionItem>
+        <FaqSection faqs={faqs} setFaqs={setFaqs} handleSave={handleSave} isSaving={saveSetting.isPending} />
+        <StatsSection stats={stats} setStats={setStats} handleSave={handleSave} isSaving={saveSetting.isPending} />
 
-      {/* 3. Why Us Cards & Programs - Defaulting to constants if empty */}
-      <AccordionItem value="item-3WhyUsCardsProg" className="bg-card border shadow-sm rounded-lg overflow-hidden">
-        <AccordionTrigger className="px-6 py-4 hover:no-underline hover:bg-muted/50 transition-colors">
-          <div className="flex-1 text-start">
-            <CardHeader className="  flex flex-row items-center justify-between">
+        <EventSection upcomingEvent={upcomingEvent} setUpcomingEvent={setUpcomingEvent} handleSave={handleSave} isSaving={saveSetting.isPending} />
+        <SkillsSection skillsCards={skillsCards} setSkillsCards={setSkillsCards} handleSave={handleSave} isSaving={saveSetting.isPending} />
+        <ServicesSection services={services} setServices={setServices} handleSave={handleSave} isSaving={saveSetting.isPending} />
+        <EmpowerSection empowerSection={empowerSection} setEmpowerSection={setEmpowerSection} handleSave={handleSave} isSaving={saveSetting.isPending} />
+        <HubSpotSection 
+          hubspotToken={hubspotToken} 
+          setHubspotToken={setHubspotToken} 
+          showToken={showToken} 
+          setShowToken={setShowToken}
+          syncPreview={syncPreview}
+          fetchPreview={() => fetchPreviewMutation.mutate()}
+          isFetchingPreview={fetchPreviewMutation.isPending}
+          syncAll={() => syncHubSpotMutation.mutate()}
+          isSyncing={syncHubSpotMutation.isPending}
+          handleSave={handleSave}
+          isSaving={saveSetting.isPending}
+        />
 
-          <CardTitle className="flex items-center gap-2"><AlertTriangle className="h-5 w-5"/> بطاقات (لماذا نحن / Why Us)</CardTitle>
-          <Button variant="outline" size="sm" onClick={() => setWhyCards(p => [...p, { title: {ar:"", en:""}, description: {ar:"", en:""}, type: "solution" }])}>
-             <Plus className="h-4 w-4 ml-1" /> إضافة بطاقة
-          </Button>
-        
-            </CardHeader>
-          </div>
-        </AccordionTrigger>
-        <AccordionContent>
-          <CardContent className="space-y-6">
-
-          {whyCards.map((card, i) => (
-            <div key={i} className="border p-4 rounded-lg bg-card/50 space-y-4 relative">
-              <Button variant="ghost" size="icon" className="absolute left-2 top-2" onClick={() => setWhyCards(p => p.filter((_, idx) => idx !== i))}><Trash2 className="h-4 w-4 text-destructive"/></Button>
-              <BilingualInput label="العنوان" value={card.title} onChange={v => setWhyCards(p => p.map((c, idx) => idx === i ? {...c, title: v} : c))} />
-              <BilingualTextarea label="الوصف" value={card.description} onChange={v => setWhyCards(p => p.map((c, idx) => idx === i ? {...c, description: v} : c))} />
-            </div>
-          ))}
-          <Button className="w-full" onClick={() => handleSave("why_cards", whyCards)} disabled={saveSetting.isPending}>حفظ التعديلات</Button>
-        
-          </CardContent>
-        </AccordionContent>
-      </AccordionItem>
-
-      <AccordionItem value="item-982362" className="bg-card border shadow-sm rounded-lg overflow-hidden">
-        <AccordionTrigger className="px-6 py-4 hover:no-underline hover:bg-muted/50 transition-colors">
-          <div className="flex-1 text-start">
-            <CardHeader className="  flex flex-row items-center justify-between">
-
-          <CardTitle className="flex items-center gap-2"><BookOpen className="h-5 w-5"/> البرامج والدورات (Programs)</CardTitle>
-          <Button variant="outline" size="sm" onClick={() => setProgramsData(p => [...p, { title: {ar:"", en:""}, level: {ar:"", en:""}, description: {ar:"", en:""} }])}>
-             <Plus className="h-4 w-4 ml-1" /> إضافة برنامج
-          </Button>
-        
-            </CardHeader>
-          </div>
-        </AccordionTrigger>
-        <AccordionContent>
-          <CardContent className="space-y-6">
-
-          {programsData.map((prog, i) => (
-            <div key={i} className="border p-4 rounded-lg bg-card/50 space-y-4 relative">
-              <Button variant="ghost" size="icon" className="absolute left-2 top-2" onClick={() => setProgramsData(p => p.filter((_, idx) => idx !== i))}><Trash2 className="h-4 w-4 text-destructive"/></Button>
-              <BilingualInput label="اسم البرنامج" value={prog.title} onChange={v => setProgramsData(p => p.map((c, idx) => idx === i ? {...c, title: v} : c))} />
-              <BilingualInput label="المستوى" value={prog.level} onChange={v => setProgramsData(p => p.map((c, idx) => idx === i ? {...c, level: v} : c))} />
-              <BilingualInput label="العنوان الفرعي" value={prog.subtitle} onChange={v => setProgramsData(p => p.map((c, idx) => idx === i ? {...c, subtitle: v} : c))} />
-              <BilingualTextarea label="الوصف" value={prog.description} onChange={v => setProgramsData(p => p.map((c, idx) => idx === i ? {...c, description: v} : c))} />
-            </div>
-          ))}
-          <Button className="w-full" onClick={() => handleSave("programs", programsData)} disabled={saveSetting.isPending}>حفظ التعديلات</Button>
-        
-          </CardContent>
-        </AccordionContent>
-      </AccordionItem>
-
-      {/* 4. Gallery & Portfolio Cards */}
-      <AccordionItem value="item-4GalleryPortfol" className="bg-card border shadow-sm rounded-lg overflow-hidden">
-        <AccordionTrigger className="px-6 py-4 hover:no-underline hover:bg-muted/50 transition-colors">
-          <div className="flex-1 text-start">
-            <CardHeader className="  flex flex-row items-center justify-between">
-
-          <CardTitle className="flex items-center gap-2"><Images className="h-5 w-5"/> معرض الأعمال / القصص (Gallery)</CardTitle>
-          <Button variant="outline" size="sm" onClick={() => setGalleryCards(p => [...p, { title: {ar:"", en:""}, description: {ar:"", en:""}, image: "" }])}>
-             <Plus className="h-4 w-4 ml-1" /> إضافة بطاقة
-          </Button>
-        
-            </CardHeader>
-          </div>
-        </AccordionTrigger>
-        <AccordionContent>
-          <CardContent className="space-y-6">
-
-          {galleryCards.map((card, i) => (
-            <div key={i} className="border p-4 rounded-lg bg-card/50 space-y-4">
-               <div className="flex justify-between items-center mb-2">
-                <span className="font-bold">بطاقة {i + 1}</span>
-                <Button variant="ghost" size="icon" onClick={() => setGalleryCards(p => p.filter((_, idx) => idx !== i))}><Trash2 className="h-4 w-4 text-destructive"/></Button>
-              </div>
-              <ImageUploadInput label="صورة العمل/المعرض" value={card.image} onChange={url => setGalleryCards(p => p.map((c, idx) => idx === i ? {...c, image: url} : c))} />
-              <BilingualInput label="الشارة البيضاوية (Badge)" value={card.badge} onChange={v => setGalleryCards(p => p.map((c, idx) => idx === i ? {...c, badge: v} : c))} />
-              <BilingualInput label="عنوان البطاقة" value={card.title} onChange={v => setGalleryCards(p => p.map((c, idx) => idx === i ? {...c, title: v} : c))} />
-              <BilingualTextarea label="الوصف المستتر" value={card.description} onChange={v => setGalleryCards(p => p.map((c, idx) => idx === i ? {...c, description: v} : c))} />
-            </div>
-          ))}
-          <Button className="w-full" onClick={() => handleSave("gallery_cards", galleryCards)} disabled={saveSetting.isPending}>حفظ التعديلات</Button>
-        
-          </CardContent>
-        </AccordionContent>
-      </AccordionItem>
-
-      {/* 5. Pricing Plans */}
-      <AccordionItem value="item-5PricingPlans" className="bg-card border shadow-sm rounded-lg overflow-hidden">
-        <AccordionTrigger className="px-6 py-4 hover:no-underline hover:bg-muted/50 transition-colors">
-          <div className="flex-1 text-start">
-            <CardHeader className="  flex flex-row items-center justify-between">
-
-          <CardTitle>باقات التسعير (Pricing Plans)</CardTitle>
-          <Button variant="outline" size="sm" onClick={() => setPlans(p => [...p, { name: {ar:"", en:""}, price: "0", features: [] }])}>
-            <Plus className="h-4 w-4 ml-1" /> إضافة باقة
-          </Button>
-        
-            </CardHeader>
-          </div>
-        </AccordionTrigger>
-        <AccordionContent>
-          <CardContent className="space-y-6">
-
-          {plans.map((plan, pi) => (
-            <div key={pi} className="border p-4 rounded-lg bg-card/50 space-y-4">
-              <div className="flex justify-between items-center">
-                <h3 className="font-semibold">باقة {pi+1}</h3>
-                <Button variant="destructive" size="sm" onClick={() => setPlans(p => p.filter((_, i) => i !== pi))}><Trash2 className="h-4 w-4"/></Button>
-              </div>
-              <BilingualInput label="اسم الباقة" value={plan.name} onChange={v => setPlans(p => p.map((c, idx) => idx === pi ? {...c, name: v} : c))} />
-              <BilingualInput label="المدة (مثال: شهرياً)" value={plan.period} onChange={v => setPlans(p => p.map((c, idx) => idx === pi ? {...c, period: v} : c))} />
-              <div className="space-y-2">
-                <Label>السعر رقماً</Label>
-                <Input type="number" value={plan.price} onChange={e => setPlans(p => p.map((c, idx) => idx === pi ? {...c, price: e.target.value} : c))} />
-              </div>
-              
-              <div className="pt-4">
-                <div className="flex justify-between items-center mb-2">
-                  <Label>المميزات (Features)</Label>
-                  <Button size="sm" variant="outline" onClick={() => setPlans(p => p.map((c, idx) => idx === pi ? {...c, features: [...(c.features||[]), {ar:"", en:""}]} : c))}>إضافة ميزة</Button>
-                </div>
-                {plan.features?.map((feat: any, fi: number) => (
-                   <div key={fi} className="flex gap-2 items-center mb-2">
-                     <div className="flex-1"><BilingualInput label={`ميزة ${fi + 1}`} value={feat} onChange={v => setPlans(p => { const newP = [...p]; newP[pi].features[fi] = v; return newP; })} /></div>
-                     <Button variant="ghost" size="icon" onClick={() => setPlans(p => { const newP = [...p]; newP[pi].features = newP[pi].features.filter((_:any, index:number) => index !== fi); return newP; })}><Trash2 className="h-4 w-4"/></Button>
-                   </div>
-                ))}
-              </div>
-            </div>
-          ))}
-          <Button className="w-full" onClick={() => handleSave("plans", plans)} disabled={saveSetting.isPending}>حفظ الباقات</Button>
-        
-          </CardContent>
-        </AccordionContent>
-      </AccordionItem>
-
-      {/* 6. Settings and Contact */}
-      <AccordionItem value="item-6SettingsandCon" className="bg-card border shadow-sm rounded-lg overflow-hidden">
-        <AccordionTrigger className="px-6 py-4 hover:no-underline hover:bg-muted/50 transition-colors">
-          <div className="flex-1 text-start">
-            <CardHeader className="  flex flex-row items-center justify-between">
-<CardTitle><Link2 className="inline mr-2 h-5 w-5"/> الإعدادات العامة</CardTitle>
-            </CardHeader>
-          </div>
-        </AccordionTrigger>
-        <AccordionContent>
-          <CardContent className="space-y-4">
-
-          <div className="space-y-4 p-4 border rounded-lg bg-card/50">
-            <h3 className="font-bold">التواصل المباشر</h3>
-            <Input placeholder="رقم الواتساب..." dir="ltr" value={whatsapp} onChange={e => setWhatsapp(e.target.value)} />
-            <Input placeholder="حساب انستاباي..." dir="ltr" value={instapay} onChange={e => setInstapay(e.target.value)} />
-            <Button onClick={() => handleSave("contact", {whatsapp, instapay})}>حفظ التواصل</Button>
-          </div>
-
-          <div className="space-y-4 p-4 border rounded-lg bg-card/50">
-            <h3 className="font-bold">منصات التواصل الاجتماعي</h3>
-            {SOCIAL_FIELDS.map(f => (
-              <Input key={f.key} placeholder={f.placeholder} dir="ltr" value={social[f.key] || ""} onChange={e => setSocial(p => ({...p, [f.key]: e.target.value}))} />
-            ))}
-            <Button onClick={() => handleSave("social", social)} disabled={saveSetting.isPending}>حفظ الروابط</Button>
-          </div>
-        
-          </CardContent>
-        </AccordionContent>
-      </AccordionItem>
-
-      {/* 7. FAQs */}
-      <AccordionItem value="item-7FAQs" className="bg-card border shadow-sm rounded-lg overflow-hidden">
-        <AccordionTrigger className="px-6 py-4 hover:no-underline hover:bg-muted/50 transition-colors">
-          <div className="flex-1 text-start">
-            <CardHeader className="  flex flex-row items-center justify-between">
-
-          <CardTitle className="flex items-center gap-2"><HelpCircle className="h-5 w-5"/> الأسئلة الشائعة</CardTitle>
-          <Button variant="outline" size="sm" onClick={() => setFaqs(p => [...p, { q: {ar:"", en:""}, a: {ar:"", en:""} }])}>
-            <Plus className="h-4 w-4 ml-1" /> إضافة سؤال
-          </Button>
-        
-            </CardHeader>
-          </div>
-        </AccordionTrigger>
-        <AccordionContent>
-          <CardContent className="space-y-6">
-
-          {faqs.map((faq, i) => (
-            <div key={i} className="border p-4 rounded-lg bg-card/50 space-y-4 relative">
-              <Button variant="ghost" size="icon" className="absolute left-2 top-2" onClick={() => setFaqs(p => p.filter((_, idx) => idx !== i))}><Trash2 className="h-4 w-4 text-destructive"/></Button>
-              <BilingualInput label="السؤال" value={faq.q} onChange={v => setFaqs(p => p.map((c, idx) => idx === i ? {...c, q: v} : c))} />
-              <BilingualTextarea label="الإجابة" value={faq.a} onChange={v => setFaqs(p => p.map((c, idx) => idx === i ? {...c, a: v} : c))} />
-            </div>
-          ))}
-          <Button className="w-full" onClick={() => handleSave("faqs", faqs)} disabled={saveSetting.isPending}>حفظ الأسئلة</Button>
-        
-          </CardContent>
-        </AccordionContent>
-      </AccordionItem>
-
-      {/* 8. Stats */}
-      <AccordionItem value="item-8Stats" className="bg-card border shadow-sm rounded-lg overflow-hidden">
-        <AccordionTrigger className="px-6 py-4 hover:no-underline hover:bg-muted/50 transition-colors">
-          <div className="flex-1 text-start">
-            <CardHeader className="  flex flex-row items-center justify-between">
-
-          <CardTitle className="flex items-center gap-2"><BarChart3 className="h-5 w-5"/> الإحصائيات</CardTitle>
-          <Button variant="outline" size="sm" onClick={() => setStats(p => [...p, { value: "", label: {ar:"", en:""}, color: "bg-accent" }])}>
-            <Plus className="h-4 w-4 ml-1" /> إضافة إحصائية
-          </Button>
-        
-            </CardHeader>
-          </div>
-        </AccordionTrigger>
-        <AccordionContent>
-          <CardContent className="space-y-6">
-
-          {stats.map((stat, i) => (
-            <div key={i} className="border p-4 rounded-lg bg-card/50 space-y-4">
-              <div className="flex justify-between items-center mb-2">
-                <span className="font-bold">إحصائية {i + 1}</span>
-                <Button variant="ghost" size="icon" onClick={() => setStats(p => p.filter((_, idx) => idx !== i))}><Trash2 className="h-4 w-4 text-destructive"/></Button>
-              </div>
-              <Label>القيمة الرقمية (مثال 500+)</Label>
-              <Input value={stat.value} dir="ltr" onChange={e => setStats(p => p.map((c, idx) => idx === i ? {...c, value: e.target.value} : c))} />
-              <BilingualInput label="نص الإحصائية" value={stat.label} onChange={v => setStats(p => p.map((c, idx) => idx === i ? {...c, label: v} : c))} />
-              <Label>اللون الكودي (Tailwind)</Label>
-              <Input value={stat.color} dir="ltr" onChange={e => setStats(p => p.map((c, idx) => idx === i ? {...c, color: e.target.value} : c))} />
-            </div>
-          ))}
-          <Button className="w-full" onClick={() => handleSave("stats", stats)} disabled={saveSetting.isPending}>حفظ الإحصائيات</Button>
-        
-          </CardContent>
-        </AccordionContent>
-      </AccordionItem>
-
-      {/* 9. Upcoming Event */}
-      <AccordionItem value="item-9UpcomingEvent" className="bg-card border shadow-sm rounded-lg overflow-hidden">
-        <AccordionTrigger className="px-6 py-4 hover:no-underline hover:bg-muted/50 transition-colors">
-          <div className="flex-1 text-start">
-            <CardHeader className="  flex flex-row items-center justify-between">
-
-          <CardTitle>الفعالية القادمة</CardTitle>
-          <div className="flex items-center gap-2">
-            <Label>مُفعل؟</Label>
-            <input type="checkbox" onClick={(e) => e.stopPropagation()}  checked={upcomingEvent.visible} onChange={e => setUpcomingEvent((p:any) => ({...p, visible: e.target.checked}))} className="w-4 h-4" />
-          </div>
-        
-            </CardHeader>
-          </div>
-        </AccordionTrigger>
-        <AccordionContent>
-          <CardContent className="space-y-6">
-
-          <BilingualInput label="الشارة (Badge)" value={upcomingEvent.badge} onChange={v => setUpcomingEvent((p:any) => ({...p, badge: v}))} />
-          <BilingualInput label="عنوان الفعالية" value={upcomingEvent.title} onChange={v => setUpcomingEvent((p:any) => ({...p, title: v}))} />
-          <BilingualInput label="التاريخ الزمني" value={upcomingEvent.date} onChange={v => setUpcomingEvent((p:any) => ({...p, date: v}))} />
-          <BilingualTextarea label="الوصف" value={upcomingEvent.description} onChange={v => setUpcomingEvent((p:any) => ({...p, description: v}))} />
-          <ImageUploadInput label="صورة خلفية الفعالية" value={upcomingEvent.backgroundImage} onChange={url => setUpcomingEvent((p:any) => ({...p, backgroundType: "image", backgroundImage: url}))} />
-          <Button className="w-full" onClick={() => handleSave("upcoming_event", upcomingEvent)} disabled={saveSetting.isPending}>حفظ الفعالية</Button>
-        
-          </CardContent>
-        </AccordionContent>
-      </AccordionItem>
-
-      {/* 10. Skills Cards */}
-      <AccordionItem value="item-10SkillsCards" className="bg-card border shadow-sm rounded-lg overflow-hidden">
-        <AccordionTrigger className="px-6 py-4 hover:no-underline hover:bg-muted/50 transition-colors">
-          <div className="flex-1 text-start">
-            <CardHeader className="  flex flex-row items-center justify-between">
-
-          <CardTitle>بطاقات المهارات المكتسبة</CardTitle>
-          <Button variant="outline" size="sm" onClick={() => setSkillsCards(p => [...p, { title: {ar:"", en:""}, description: {ar:"", en:""}, buttonText: {ar:"", en:""}, image: "" }])}>
-            <Plus className="h-4 w-4 ml-1" /> إضافة بطاقة مهارة
-          </Button>
-        
-            </CardHeader>
-          </div>
-        </AccordionTrigger>
-        <AccordionContent>
-          <CardContent className="space-y-6">
-
-          {skillsCards.map((card, i) => (
-            <div key={i} className="border p-4 rounded-lg bg-card/50 space-y-4">
-              <div className="flex justify-between items-center mb-2">
-                <span className="font-bold">بطاقة مهارة {i + 1}</span>
-                <Button variant="ghost" size="icon" onClick={() => setSkillsCards(p => p.filter((_, idx) => idx !== i))}><Trash2 className="h-4 w-4 text-destructive"/></Button>
-              </div>
-              <ImageUploadInput label="الصورة المصغرة للمهارة" value={card.image} onChange={url => setSkillsCards(p => p.map((c, idx) => idx === i ? {...c, image: url} : c))} />
-              <BilingualInput label="عنوان المهارة" value={card.title} onChange={v => setSkillsCards(p => p.map((c, idx) => idx === i ? {...c, title: v} : c))} />
-              <BilingualTextarea label="الوصف" value={card.description} onChange={v => setSkillsCards(p => p.map((c, idx) => idx === i ? {...c, description: v} : c))} />
-              <BilingualInput label="نص الزر" value={card.buttonText} onChange={v => setSkillsCards(p => p.map((c, idx) => idx === i ? {...c, buttonText: v} : c))} />
-            </div>
-          ))}
-          <Button className="w-full" onClick={() => handleSave("skills_cards", skillsCards)} disabled={saveSetting.isPending}>حفظ البطاقات</Button>
-        
-          </CardContent>
-        </AccordionContent>
-      </AccordionItem>
-
-      {/* 11. Subjects */}
-      <AccordionItem value="item-11Subjects" className="bg-card border shadow-sm rounded-lg overflow-hidden">
-        <AccordionTrigger className="px-6 py-4 hover:no-underline hover:bg-muted/50 transition-colors">
-          <div className="flex-1 text-start">
-            <CardHeader className="  flex flex-row items-center justify-between">
-
-          <CardTitle>المواد الدراسية</CardTitle>
-          <Button variant="outline" size="sm" onClick={() => setSubjects(p => [...p, { title: {ar:"", en:""}, grade: {ar:"", en:""} }])}>
-            <Plus className="h-4 w-4 ml-1" /> إضافة مادة
-          </Button>
-        
-            </CardHeader>
-          </div>
-        </AccordionTrigger>
-        <AccordionContent>
-          <CardContent className="space-y-6">
-
-          {subjects.map((sub, i) => (
-            <div key={i} className="border p-4 rounded-lg bg-card/50 space-y-4 relative">
-              <Button variant="ghost" size="icon" className="absolute left-2 top-2" onClick={() => setSubjects(p => p.filter((_, idx) => idx !== i))}><Trash2 className="h-4 w-4 text-destructive"/></Button>
-              <BilingualInput label="اسم المادة" value={sub.title} onChange={v => setSubjects(p => p.map((c, idx) => idx === i ? {...c, title: v} : c))} />
-              <BilingualInput label="المرحلة (Grade)" value={sub.grade} onChange={v => setSubjects(p => p.map((c, idx) => idx === i ? {...c, grade: v} : c))} />
-            </div>
-          ))}
-          <Button className="w-full" onClick={() => handleSave("subjects", subjects)} disabled={saveSetting.isPending}>حفظ المواد</Button>
-        
-          </CardContent>
-        </AccordionContent>
-      </AccordionItem>
-
-      {/* 12. Empower Section */}
-      <AccordionItem value="item-12EmpowerSectio" className="bg-card border shadow-sm rounded-lg overflow-hidden">
-        <AccordionTrigger className="px-6 py-4 hover:no-underline hover:bg-muted/50 transition-colors">
-          <div className="flex-1 text-start">
-            <CardHeader className="  flex flex-row items-center justify-between">
-
-          <CardTitle>قسم التمكين (Empower Section)</CardTitle>
-        
-            </CardHeader>
-          </div>
-        </AccordionTrigger>
-        <AccordionContent>
-          <CardContent className="space-y-6">
-
-          <BilingualInput label="العنوان الفرعي" value={empowerSection.subtitle} onChange={v => setEmpowerSection((p:any) => ({...p, subtitle: v}))} />
-          <BilingualInput label="العنوان الرئيسي" value={empowerSection.title} onChange={v => setEmpowerSection((p:any) => ({...p, title: v}))} />
-          <BilingualInput label="الجزء المميز من العنوان" value={empowerSection.titleHighlight} onChange={v => setEmpowerSection((p:any) => ({...p, titleHighlight: v}))} />
-          <BilingualTextarea label="الوصف" value={empowerSection.description} onChange={v => setEmpowerSection((p:any) => ({...p, description: v}))} />
-          <BilingualInput label="نص الزر" value={empowerSection.ctaText} onChange={v => setEmpowerSection((p:any) => ({...p, ctaText: v}))} />
-          
-          <div className="pt-4 border-t space-y-4">
-            <div className="flex justify-between items-center">
-              <Label className="font-bold">إحصائيات القسم المدمجة</Label>
-              <Button size="sm" variant="outline" onClick={() => setEmpowerSection((p:any) => ({...p, stats: [...(p.stats||[]), {label: {ar:"", en:""}, value: ""}]}))}>
-                <Plus className="h-4 w-4" />
-              </Button>
-            </div>
-            {empowerSection.stats?.map((st:any, i:number) => (
-              <div key={i} className="flex gap-2 items-start border p-3 rounded-md bg-muted/10">
-                <div className="flex-1 space-y-2">
-                  <Input placeholder="القيمة الرقمية (45M+)" value={st.value} dir="ltr" onChange={e => setEmpowerSection((p:any) => { const s = [...p.stats]; s[i].value = e.target.value; return {...p, stats: s}; })} />
-                  <BilingualInput label={`وصف ${i+1}`} value={st.label} onChange={v => setEmpowerSection((p:any) => { const s = [...p.stats]; s[i].label = v; return {...p, stats: s}; })} />
-                </div>
-                <Button variant="ghost" size="icon" className="mt-8" onClick={() => setEmpowerSection((p:any) => ({...p, stats: p.stats.filter((_:any, idx:number) => idx !== i)}))}><Trash2 className="h-4 w-4" /></Button>
-              </div>
-            ))}
-          </div>
-          <Button className="w-full" onClick={() => handleSave("empower_section", empowerSection)} disabled={saveSetting.isPending}>حفظ التعديلات</Button>
-        
-          </CardContent>
-        </AccordionContent>
-      </AccordionItem>
+        <CommunicationSection 
+          smtpHost={smtpHost}
+          setSmtpHost={setSmtpHost}
+          smtpPort={smtpPort}
+          setSmtpPort={setSmtpPort}
+          smtpUser={smtpUser}
+          setSmtpUser={setSmtpUser}
+          smtpPass={smtpPass}
+          setSmtpPass={setSmtpPass}
+          senderEmail={senderEmail}
+          setSenderEmail={setSenderEmail}
+          showPass={showPass}
+          setShowPass={setShowPass}
+          handleSave={handleSave}
+          isSaving={saveSetting.isPending}
+        />
       
     </Accordion>
     </div>

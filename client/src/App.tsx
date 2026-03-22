@@ -16,6 +16,8 @@ const Checkout = lazy(() => import("@/pages/Checkout"));
 const JoinTeam = lazy(() => import("@/pages/JoinTeam"));
 const AdminLogin = lazy(() => import("@/pages/AdminLogin"));
 const AdminDashboard = lazy(() => import("@/pages/AdminDashboard"));
+const UserLogin = lazy(() => import("@/pages/UserLogin"));
+const UserDashboard = lazy(() => import("@/pages/UserDashboard"));
 const NotFound = lazy(() => import("@/pages/not-found"));
 
 function LoadingFallback() {
@@ -53,6 +55,16 @@ function Router() {
       <Route path="/join-us">
         <Suspense fallback={<LoadingFallback />}>
           <JoinTeam />
+        </Suspense>
+      </Route>
+      <Route path="/login">
+        <Suspense fallback={<LoadingFallback />}>
+          <UserLogin />
+        </Suspense>
+      </Route>
+      <Route path="/dashboard">
+        <Suspense fallback={<LoadingFallback />}>
+          <UserDashboard />
         </Suspense>
       </Route>
       <Route path="/admin/login">

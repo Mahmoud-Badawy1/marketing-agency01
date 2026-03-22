@@ -1,8 +1,8 @@
-# Teacher Recruitment System - Implementation Complete ✅
+# Expert Recruitment System - Implementation Complete ✅
 
 ## Overview
 
-Successfully implemented a complete teacher recruitment system for Abqary platform with full CRUD operations, admin management, and SEO optimization.
+Successfully implemented a complete expert recruitment system for Marketeer Pro platform with full CRUD operations, admin management, and SEO optimization.
 
 ---
 
@@ -11,42 +11,42 @@ Successfully implemented a complete teacher recruitment system for Abqary platfo
 ### 1. **Backend Infrastructure (Complete)**
 
 #### Database Schema (`shared/schema.ts`)
-- **TeacherApplication Model** with 16 fields:
+- **ExpertApplication Model** with 16 fields:
   - Personal info: fullName, email, phone, age, city
   - Education: education, specialization, experienceYears
-  - Experience: hasAbacusExperience, abacusDetails, teachingPlatforms
+  - Experience: hasAgencyExperience, portfolioDetails, marketingTools
   - Preferences: availableHours, motivation
   - File: cvUrl (PDF stored in Cloudinary)
   - Status: status (new → reviewed → interview → accepted → rejected)
   - Admin: adminNotes, timestamps
 
 #### Storage Layer (`server/storage.ts`)
-- `createTeacherApplication()` - Save new application
-- `getTeacherApplications()` - Fetch all (sorted newest first)
-- `updateTeacherApplicationStatus()` - Update application status
-- `updateTeacherApplicationNotes()` - Add/edit admin notes
-- `deleteTeacherApplication()` - Remove application
+- `createExpertApplication()` - Save new application
+- `getExpertApplications()` - Fetch all (sorted newest first)
+- `updateExpertApplicationStatus()` - Update application status
+- `updateExpertApplicationNotes()` - Add/edit admin notes
+- `deleteExpertApplication()` - Remove application
 
 #### API Routes (`server/routes.ts` & `api/index.ts`)
 **Public Route:**
-- `POST /api/teacher-applications` - Submit application with optional CV
+- `POST /api/expert-applications` - Submit application with optional CV
 
 **Admin Routes:**
-- `GET /api/admin/teacher-applications` - List all applications
-- `PUT /api/admin/teacher-applications/:id/status` - Update status
-- `PUT /api/admin/teacher-applications/:id/notes` - Update notes
-- `DELETE /api/admin/teacher-applications/:id` - Delete application
+- `GET /api/admin/expert-applications` - List all applications
+- `PUT /api/admin/expert-applications/:id/status` - Update status
+- `PUT /api/admin/expert-applications/:id/notes` - Update notes
+- `DELETE /api/admin/expert-applications/:id` - Delete application
 
 #### File Upload
 - **Multer** configured for PDF uploads (max 5MB)
-- **Cloudinary** storage in `abqary/cvs` folder
+- **Cloudinary** storage in `agency/cvs` folder
 - Validation: PDF only, size limit enforced
 
 ---
 
 ### 2. **Frontend Pages (Complete)**
 
-#### Teacher Recruitment Page ([JoinTeam.tsx](client/src/pages/JoinTeam.tsx))
+#### Expert Recruitment Page ([JoinTeam.tsx](client/src/pages/JoinTeam.tsx))
 
 **Sections:**
 1. **Hero Section** - Gradient banner with CTA
@@ -56,7 +56,7 @@ Successfully implemented a complete teacher recruitment system for Abqary platfo
    - Personal info inputs
    - Education selects
    - Experience fields
-   - Conditional Abacus details (shows when user has experience)
+   - Conditional Agency details (shows when user has experience)
    - CV file upload with drag-drop
    - Motivation textarea (500 char limit)
    - Submit button with loading state
@@ -77,7 +77,7 @@ Successfully implemented a complete teacher recruitment system for Abqary platfo
 
 ### 3. **Admin Dashboard Tab (Complete)**
 
-#### Teacher Applications Tab ([AdminDashboard.tsx](client/src/pages/AdminDashboard.tsx))
+#### Expert Applications Tab ([AdminDashboard.tsx](client/src/pages/AdminDashboard.tsx))
 
 **Features:**
 - **Applications Table** with columns:
@@ -112,12 +112,12 @@ new → reviewed → interview → accepted
 ### 4. **Navigation Updates (Complete)**
 
 #### Navbar ([Navbar.tsx](client/src/components/layout/Navbar.tsx))
-- ✅ Added "انضم كمدرب" button (desktop)
+- ✅ Added "انضم للفريق" button (desktop)
 - ✅ Added mobile menu item
 - ✅ Links to `/join-us`
 
 #### Footer ([Footer.tsx](client/src/components/layout/Footer.tsx))
-- ✅ Added "انضم كمدرب" link in platform section
+- ✅ Added "انضم للفريق" link in platform section
 - ✅ Proper routing for both scroll and page links
 
 #### App Router ([App.tsx](client/src/App.tsx))
@@ -197,12 +197,12 @@ git push origin master
 
 1. **Test Public Routes:**
    - ✅ Homepage: `https://abqary.com/`
-   - ✅ Teacher page: `https://abqary.com/join-us`
+   - ✅ Expert page: `https://abqary.com/join-us`
    - ✅ Submit application form
 
 2. **Test Admin Dashboard:**
    - ✅ Login: `https://abqary.com/admin`
-   - ✅ View "طلبات المدربين" tab
+   - ✅ View "طلبات الانضمام" tab
    - ✅ Update application status
    - ✅ Edit notes
    - ✅ Delete application
@@ -222,7 +222,7 @@ git push origin master
 
 ## 🎨 Design Consistency
 
-The teacher recruitment page follows the same design language as the main landing page:
+The expert recruitment page follows the same design language as the main landing page:
 
 - ✅ Gradient hero banner (purple → blue → indigo)
 - ✅ Card-based sections with hover effects
@@ -242,11 +242,11 @@ User fills form → Submit
          ↓
 FormData with CV file
          ↓
-POST /api/teacher-applications
+POST /api/expert-applications
          ↓
 Multer processes file → Upload to Cloudinary
          ↓
-Save to MongoDB (TeacherApplication collection)
+Save to MongoDB (ExpertApplication collection)
          ↓
 Return success/error
          ↓
@@ -254,11 +254,11 @@ Show success animation OR error toast
 ```
 
 ```
-Admin views applications → GET /api/admin/teacher-applications
+Admin views applications → GET /api/admin/expert-applications
          ↓
 Display in table with all details
          ↓
-Admin updates status → PUT /api/admin/teacher-applications/:id/status
+Admin updates status → PUT /api/admin/expert-applications/:id/status
          ↓
 Update MongoDB document
          ↓
@@ -285,7 +285,7 @@ Refresh table via TanStack Query cache invalidation
 
 **3. Admin can't see applications**
 - Verify login is successful
-- Check "طلبات المدربين" tab exists
+- Check "طلبات الانضمام" tab exists
 - Check console for API errors
 - Verify MongoDB connection
 
@@ -295,7 +295,7 @@ Refresh table via TanStack Query cache invalidation
 
 ```
 client/src/pages/
-├── JoinTeam.tsx           # Teacher recruitment page
+├── JoinTeam.tsx           # Expert recruitment page
 └── AdminDashboard.tsx     # Admin dashboard with new tab
 
 server/
@@ -311,7 +311,7 @@ shared/
 
 docs/
 ├── PRERENDER_SETUP.md     # Prerender.io troubleshooting guide
-└── TEACHER_RECRUITMENT_IMPLEMENTATION.md  # This file
+└── EXPERT_RECRUITMENT_IMPLEMENTATION.md  # This file
 ```
 
 ---
@@ -324,13 +324,13 @@ docs/
 - [ ] Document upload (certificates, ID)
 - [ ] Application analytics dashboard
 - [ ] Automated status updates based on criteria
-- [ ] Teacher onboarding workflow
+- [ ] Expert onboarding workflow
 
 ### SEO Improvements
 - [ ] Submit sitemap to Google Search Console
-- [ ] Monitor Google Jobs listing for teacher position
+- [ ] Monitor Google Jobs listing for expert position
 - [ ] Create social media cards for /join-us page
-- [ ] Add FAQ section for teachers
+- [ ] Add FAQ section for experts
 - [ ] Optimize meta descriptions
 
 ---
@@ -354,9 +354,9 @@ docs/
 
 ## 📝 Summary
 
-The complete teacher recruitment system is now live and ready for deployment. All features have been implemented, tested, and documented. The system allows:
+The complete expert recruitment system is now live and ready for deployment. All features have been implemented, tested, and documented. The system allows:
 
-**For Teachers:**
+**For Experts:**
 - Submit application with full details
 - Upload CV as PDF
 - Receive confirmation

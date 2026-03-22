@@ -3,6 +3,7 @@
     "brand_ar": "ماركتير برو",
     "brand_en": "Marketer Pro",
     "join_as_instructor": "Join Our Team",
+    "login": "Login",
     "subscribe_now": "Book a Call",
     "home": "Home",
     "programs": "Services",
@@ -198,21 +199,6 @@
     "card2_title": "Paid Media That Scales",
     "card2_desc": "Data-driven ad campaigns across Meta, Google, and TikTok that deliver consistent ROAS above industry benchmarks",
     "card2_cta": "See Case Studies"
-  },
-  "skills": {
-    "campaigns": "Ads Campaign Management",
-    "seo": "Search Engine Optimization",
-    "copywriting": "Copywriting"
-  },
-  "subjects": {
-    "fb_insta": "Meta Ads Management",
-    "fb_insta_level": "Full Funnel",
-    "google": "Google Ads & PPC",
-    "google_level": "Search & Shopping",
-    "content": "Content & Social",
-    "content_level": "Strategy & Production",
-    "email": "Email & CRM",
-    "email_level": "Automation & Nurture"
   },
   "demo": {
     "badge": "ROI Calculator",

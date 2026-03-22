@@ -11,17 +11,21 @@ export function formatDate(date: string | Date | null | undefined) {
   });
 }
 
-export function formatChildren(children: { name: string; age: number }[] | null | undefined) {
-  if (!children || children.length === 0) return "-";
-  return children.map((c) => `${c.name} (${c.age} سنة)`).join("، ");
+export function formatServices(services: { name: string; description?: string }[] | null | undefined) {
+  if (!services || services.length === 0) return "-";
+  return services.map((s) => `${s.name}${s.description ? ` (${s.description})` : ""}`).join("، ");
 }
 
-export function formatSchoolType(type: string | null | undefined) {
+export function formatServiceInterest(type: string | null | undefined) {
   if (!type) return "-";
   const labels: Record<string, string> = { 
-    government: "حكومي", 
-    private: "خاص", 
-    languages: "لغات" 
+    consultation: "استشارة", 
+    branding: "هوية بصرية", 
+    ads: "إيرادات وإعلانات",
+    strategy: "خطة استراتيجية",
+    social_media: "سوشيال ميديا",
+    seo: "تحسين محركات البحث",
+    other: "أخرى"
   };
   return labels[type] || type;
 }

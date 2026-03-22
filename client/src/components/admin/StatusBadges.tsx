@@ -20,8 +20,10 @@ export function OrderStatusBadge({ status }: { status: string | null | undefined
   if (status === "confirmed") {
     return <Badge data-testid="badge-status-confirmed" className="bg-green-500 text-white no-default-hover-elevate no-default-active-elevate">مؤكد</Badge>;
   }
-  if (status === "rejected") {
-    return <Badge data-testid="badge-status-rejected" className="bg-red-500 text-white no-default-hover-elevate no-default-active-elevate">مرفوض</Badge>;
+  if (status === "rejected" || status === "cancelled") {
+    return <Badge data-testid={`badge-status-${status}`} className="bg-red-500 text-white no-default-hover-elevate no-default-active-elevate">
+      {status === "rejected" ? "مرفوض" : "ملغى"}
+    </Badge>;
   }
   return <Badge data-testid="badge-status-unknown">{status}</Badge>;
 }

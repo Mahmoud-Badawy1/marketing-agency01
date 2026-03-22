@@ -87,9 +87,9 @@ shared/
 
 ### Database Tables
 - `users` - User accounts (for future auth)
-- `leads` - Contact form submissions (parentName, phone, childAge, message, source, status)
-- `orders` - Checkout orders (parentName, phone, childAge, childName, plan, amount, children JSONB, transferImage, status)
-- `trial_bookings` - Trial class bookings (parentName, phone, children JSONB, status)
+- `leads` - Contact form submissions (clientName, phone, monthlyBudget, message, source, status)
+- `orders` - Checkout orders (clientName, phone, monthlyBudget, projectName, plan, amount, services JSONB, transferImage, status)
+- `trial_bookings` - Consultation bookings (clientName, phone, status)
 - `site_settings` - Platform settings as key-value pairs:
   - key="plans": Array of plan objects (id, name, subtitle, price, period, features[], popular)
   - key="images": Object with image paths (mascot, instructor, gallery1, gallery2)

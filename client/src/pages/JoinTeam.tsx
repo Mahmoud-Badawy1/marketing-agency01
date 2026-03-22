@@ -95,9 +95,9 @@ export default function JoinTeam() {
     education: "",
     specialization: "",
     experienceYears: "",
-    hasAbacusExperience: "",
-    abacusDetails: "",
-    teachingPlatforms: "",
+    hasAgencyExperience: "",
+    portfolioDetails: "",
+    marketingTools: "",
     availableHours: "",
     motivation: "",
   });
@@ -106,7 +106,7 @@ export default function JoinTeam() {
 
   const mutation = useMutation({
     mutationFn: async (data: FormData) => {
-      return apiRequest("POST", "/api/teacher-applications", data);
+      return apiRequest("POST", "/api/expert-applications", data);
     },
     onSuccess: () => {
       setSubmitted(true);
@@ -539,34 +539,34 @@ export default function JoinTeam() {
                   <div>
                     <Label className="mb-4 block">{t({ ar: "هل لديك خبرة سابقة في إدارة حملات تسويقية ناجحة؟ *", en: "Do you have previous experience managing successful marketing campaigns? *" })}</Label>
                     <RadioGroup 
-                      onValueChange={(value) => handleChange("hasAbacusExperience", value)}
+                      onValueChange={(value) => handleChange("hasAgencyExperience", value)}
                       className="flex gap-6"
                       required
                       dir={language === "ar" ? "rtl" : "ltr"}
                     >
                       <div className={`flex items-center space-x-2 ${language === "ar" ? "space-x-reverse" : ""}`}>
-                        <RadioGroupItem value="true" id="abacus-yes" />
-                        <Label htmlFor="abacus-yes">{t({ ar: "نعم", en: "Yes" })}</Label>
+                        <RadioGroupItem value="true" id="agency-yes" />
+                        <Label htmlFor="agency-yes">{t({ ar: "نعم", en: "Yes" })}</Label>
                       </div>
                       <div className={`flex items-center space-x-2 ${language === "ar" ? "space-x-reverse" : ""}`}>
-                        <RadioGroupItem value="false" id="abacus-no" />
-                        <Label htmlFor="abacus-no">{t({ ar: "لا", en: "No" })}</Label>
+                        <RadioGroupItem value="false" id="agency-no" />
+                        <Label htmlFor="agency-no">{t({ ar: "لا", en: "No" })}</Label>
                       </div>
                     </RadioGroup>
                   </div>
 
                   {/* Previous Experience Details (conditional) */}
-                  {formData.hasAbacusExperience === "true" && (
+                  {formData.hasAgencyExperience === "true" && (
                     <motion.div
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: "auto" }}
                       exit={{ opacity: 0, height: 0 }}
                     >
-                      <Label htmlFor="abacusDetails" className="mb-2 block">{t({ ar: "أبرز إنجازاتك أو حملاتك التسويقية", en: "Your most prominent marketing achievements or campaigns" })}</Label>
+                      <Label htmlFor="portfolioDetails" className="mb-2 block">{t({ ar: "أبرز إنجازاتك أو حملاتك التسويقية", en: "Your most prominent marketing achievements or campaigns" })}</Label>
                       <Textarea
-                        id="abacusDetails"
-                        value={formData.abacusDetails}
-                        onChange={(e) => handleChange("abacusDetails", e.target.value)}
+                        id="portfolioDetails"
+                        value={formData.portfolioDetails}
+                        onChange={(e) => handleChange("portfolioDetails", e.target.value)}
                         placeholder={t({ ar: "اذكر تفاصيل خبرتك والنتائج التي حققتها للعملاء...", en: "Mention details of your experience and the results you achieved for clients..." })}
                         rows={3}
                         dir={language === "ar" ? "rtl" : "ltr"}
@@ -575,13 +575,13 @@ export default function JoinTeam() {
                   )}
 
                   <div className="grid md:grid-cols-2 gap-6">
-                    {/* Platforms */}
+                    {/* Tools */}
                     <div>
-                      <Label htmlFor="teachingPlatforms" className="mb-2 block">{t({ ar: "المنصات التسويقية التي تتقنها", en: "Marketing Platforms you master" })}</Label>
+                      <Label htmlFor="marketingTools" className="mb-2 block">{t({ ar: "المنصات التسويقية التي تتقنها", en: "Marketing Platforms you master" })}</Label>
                       <Input
-                        id="teachingPlatforms"
-                        value={formData.teachingPlatforms}
-                        onChange={(e) => handleChange("teachingPlatforms", e.target.value)}
+                        id="marketingTools"
+                        value={formData.marketingTools}
+                        onChange={(e) => handleChange("marketingTools", e.target.value)}
                         placeholder="Facebook Ads, Google Ads, TikTok..."
                         dir="ltr"
                       />

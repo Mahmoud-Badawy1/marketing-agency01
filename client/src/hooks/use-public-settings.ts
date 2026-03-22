@@ -152,6 +152,7 @@ export interface PublicSettings {
   gallery_cards?: GalleryCard[];
   skills_cards?: SkillCard[];
   subjects?: SubjectData[];
+  services?: any[];
   empower_section?: EmpowerSection;
 }
 
