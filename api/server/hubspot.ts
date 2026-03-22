@@ -42,7 +42,7 @@ export const hubspot = {
         email: lead.email || undefined,
         phone: lead.phone,
         fullname: lead.clientName,
-        monthly_budget: lead.monthlyBudget.toString(),
+        monthly_budget: lead.monthlyBudget?.toString() || "0",
         service_interest: lead.serviceInterest || "",
         company: lead.companyName || "",
         message: lead.message || "",
