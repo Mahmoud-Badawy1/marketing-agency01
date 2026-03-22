@@ -1,8 +1,8 @@
 import "dotenv/config";
 import express, { type Request, Response, NextFunction } from "express";
-import "./server/db.js";
+import "./_server/db.js";
 import { ZodError, z } from "zod";
-import { registerRoutes } from "./server/routes.js";
+import { registerRoutes } from "./_server/routes.js";
 import { createServer } from "http";
 import { v2 as cloudinary } from "cloudinary";
 import multer from "multer";
