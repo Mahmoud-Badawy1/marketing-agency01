@@ -115,10 +115,10 @@ export default function JoinTeam() {
         description: t({ ar: "سنراجع طلبك ونتواصل معك قريباً إن شاء الله", en: "We will review your application and contact you soon." }),
       });
     },
-    onError: () => {
+    onError: (error: Error) => {
       toast({
         title: t({ ar: "حدث خطأ", en: "An error occurred" }),
-        description: t({ ar: "يرجى المحاولة مرة أخرى أو التواصل معنا", en: "Please try again or contact us." }),
+        description: error.message || t({ ar: "يرجى المحاولة مرة أخرى أو التواصل معنا", en: "Please try again or contact us." }),
         variant: "destructive",
       });
     },
@@ -129,7 +129,9 @@ export default function JoinTeam() {
     
     const formDataToSend = new FormData();
     Object.entries(formData).forEach(([key, value]) => {
-      if (value) formDataToSend.append(key, value);
+      if (value !== undefined && value !== null && value !== "") {
+        formDataToSend.append(key, value);
+      }
     });
     
     if (cvFile) {

@@ -1,6 +1,6 @@
 import "dotenv/config";
-import mongoose from "./api/server/db.js";
-import { storage } from "./api/server/storage.js";
+import mongoose from "./api/_server/db.js";
+import { storage } from "./api/_server/storage.js";
 
 async function diag() {
   console.log("Starting diagnostics...");
