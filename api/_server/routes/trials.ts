@@ -2,7 +2,7 @@ import { Router } from "express";
 import { z, ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";
 import { storage } from "../storage.js";
-import { insertTrialBookingSchema, TrialBooking } from "../../_shared/schema.js";
+import { insertTrialBookingSchema, TrialBooking, AvailabilitySlot } from "../../_shared/schema.js";
 import { getOrCreateUser, adminAuth, adminApiRateLimit } from "./common.js";
 import { userAuth } from "../auth.js";
 import { hubspot } from "../hubspot.js";
@@ -45,32 +45,31 @@ router.post("/trial-bookings", async (req, res) => {
   }
 });
 
-// Helper to ensure scheduledTime is set if scheduledSlotId exists
-async function repairBookingTime(booking: any) {
-  if (!booking.scheduledTime && booking.scheduledSlotId) {
-    try {
-      const slot = await storage.getAvailabilitySlot(booking.scheduledSlotId);
-      if (slot) {
-        const [hours, minutes] = slot.startTime.split(':');
-        const d = new Date(slot.date);
-        d.setHours(parseInt(hours), parseInt(minutes));
-        
-        await storage.updateTrialBooking(booking._id.toString(), { scheduledTime: d });
-        return { ...booking, scheduledTime: d };
-      }
-    } catch (e) {
-      console.error(`Failed to repair booking ${booking._id}:`, e);
-    }
-  }
-  return booking;
-}
+// Legacy helper removed: Batch processing implemented in route directly
 
 // User
 router.get("/user/trials", userAuth, async (req, res) => {
   try {
     const trials = await storage.getUserTrialBookings((req as any).userAuth?.id || "");
-    const repairedTrials = await Promise.all(trials.map(repairBookingTime));
-    res.json(repairedTrials);
+    const bookingsToRepair = trials.filter(b => !b.scheduledTime && b.scheduledSlotId);
+    if (bookingsToRepair.length > 0) {
+      const slotIds = bookingsToRepair.map(b => b.scheduledSlotId);
+      const slots = await AvailabilitySlot.find({ _id: { $in: slotIds } }).lean();
+      const slotMap = new Map(slots.map((s: any) => [s._id.toString(), s]));
+      const updatePromises = bookingsToRepair.map(booking => {
+        const slot = slotMap.get(booking.scheduledSlotId!);
+        if (slot) {
+          const [hours, minutes] = slot.startTime.split(':');
+          const d = new Date(slot.date);
+          d.setHours(parseInt(hours), parseInt(minutes));
+          (booking as any).scheduledTime = d;
+          return storage.updateTrialBooking((booking as any)._id.toString(), { scheduledTime: d });
+        }
+        return Promise.resolve();
+      });
+      await Promise.all(updatePromises);
+    }
+    res.json(trials);
   } catch (error) {
     res.status(500).json({ message: "خطأ في جلب الحجوزات" });
   }
@@ -160,8 +159,30 @@ router.put("/user/trials/:id", userAuth, async (req, res) => {
 router.get("/admin/trial-bookings", adminAuth, adminApiRateLimit, async (_req, res) => {
   try {
     const bookings = await storage.getTrialBookings();
-    const repairedBookings = await Promise.all(bookings.map(repairBookingTime));
-    res.json(repairedBookings);
+    const bookingsToRepair = bookings.filter(b => !b.scheduledTime && b.scheduledSlotId);
+    
+    if (bookingsToRepair.length > 0) {
+      const slotIds = bookingsToRepair.map(b => b.scheduledSlotId);
+      // Batch fetch all required slots
+      const slots = await AvailabilitySlot.find({ _id: { $in: slotIds } }).lean();
+      const slotMap = new Map(slots.map((s: any) => [s._id.toString(), s]));
+      
+      const updatePromises = bookingsToRepair.map(booking => {
+        const slot = slotMap.get(booking.scheduledSlotId!);
+        if (slot) {
+          const [hours, minutes] = slot.startTime.split(':');
+          const d = new Date(slot.date);
+          d.setHours(parseInt(hours), parseInt(minutes));
+          (booking as any).scheduledTime = d;
+          return storage.updateTrialBooking((booking as any)._id.toString(), { scheduledTime: d });
+        }
+        return Promise.resolve();
+      });
+      
+      await Promise.all(updatePromises);
+    }
+    
+    res.json(bookings);
   } catch (error) {
     res.status(500).json({ message: "خطأ في جلب حجوزات التجربة" });
   }

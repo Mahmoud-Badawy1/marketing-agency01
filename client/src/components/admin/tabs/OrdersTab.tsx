@@ -12,6 +12,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useSmartSearch } from "@/hooks/use-smart-search";
+import { exportToExcel } from "@/hooks/use-excel-export";
+import { AdminSearchBar } from "../AdminSearchBar";
+import { ExportButton } from "../ExportButton";
 
 export function OrdersTab() {
   const { toast } = useToast();
@@ -90,13 +94,49 @@ export function OrdersTab() {
     },
   });
 
+  const [searchQuery, setSearchQuery] = useState("");
+  
+  const filteredOrders = useSmartSearch(orders, ['clientName', 'email', 'phone', 'plan', 'couponCode'], searchQuery);
+
+  const handleExport = () => {
+    exportToExcel(
+      filteredOrders,
+      [
+        { key: 'clientName', header: 'اسم العميل' },
+        { key: 'email', header: 'البريد' },
+        { key: 'phone', header: 'الهاتف' },
+        { key: 'plan', header: 'نوع الخدمة', formatter: (val) => formatServiceInterest(val as string) },
+        { key: 'services', header: 'الخدمات الإضافية', formatter: (val) => formatServices(val as string[]) },
+        { key: 'amount', header: 'المبلغ' },
+        { key: 'couponCode', header: 'كوبون الخصم' },
+        { key: 'status', header: 'الحالة' },
+        { key: 'createdAt', header: 'التاريخ', formatter: (val) => formatDate(val as string) },
+      ],
+      `orders_export_${new Date().toISOString().split('T')[0]}`
+    );
+  };
+
   if (isLoading) {
     return <div className="text-center py-8 text-muted-foreground" data-testid="loading-orders">جاري التحميل...</div>;
   }
 
   return (
-    <div className="overflow-x-auto relative">
-      <table className="w-full text-sm" data-testid="table-orders">
+    <div className="space-y-4 relative">
+      <div className="flex flex-col sm:flex-row gap-4 justify-between">
+        <div className="flex-1">
+          <AdminSearchBar 
+            value={searchQuery}
+            onChange={setSearchQuery}
+            placeholder="ابحث بالاسم، الهاتف، البريد، الباقة، أو كوبون الخصم..."
+            resultCount={filteredOrders.length}
+            totalCount={orders.length}
+          />
+        </div>
+        <ExportButton onExport={handleExport} className="shrink-0" />
+      </div>
+    
+      <div className="overflow-x-auto rounded-xl border bg-card">
+        <table className="w-full text-sm" data-testid="table-orders">
         <thead>
           <tr className="border-b">
             <th className="text-right p-3 font-medium">اسم العميل</th>
@@ -111,7 +151,7 @@ export function OrdersTab() {
           </tr>
         </thead>
         <tbody>
-          {orders.map((order) => (
+          {filteredOrders.map((order) => (
             <tr key={order._id} className="border-b" data-testid={`row-order-${order._id}`}>
               <td className="p-3">
                 <div className="font-semibold">{order.clientName}</div>
@@ -193,13 +233,16 @@ export function OrdersTab() {
               </td>
             </tr>
           ))}
-          {orders.length === 0 && (
+          {filteredOrders.length === 0 && (
             <tr>
-              <td colSpan={9} className="p-8 text-center text-muted-foreground">لا توجد اشتراكات</td>
+              <td colSpan={9} className="p-8 text-center text-muted-foreground">
+                لا يوجد نتائج للبحث العالي
+              </td>
             </tr>
           )}
         </tbody>
       </table>
+    </div>
 
       {/* Cancel Dialog */}
       <Dialog open={!!cancelOrderObj} onOpenChange={(val) => !val && setCancelOrderObj(null)}>

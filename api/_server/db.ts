@@ -20,8 +20,10 @@ if (!MONGODB_URI) {
 
 // Connect to MongoDB
 mongoose.connect(MONGODB_URI, { 
-    serverSelectionTimeoutMS: 20000, // Increased from 10s to 20s
-    socketTimeoutMS: 45000 
+    serverSelectionTimeoutMS: 20000,
+    socketTimeoutMS: 45000,
+    maxPoolSize: 5,
+    maxIdleTimeMS: 10000
   })
   .then(() => console.log('✅ Successfully connected to MongoDB'))
   .catch(err => {
@@ -48,9 +50,6 @@ mongoose.connection.on('disconnected', () => {
   console.warn('MongoDB disconnected');
 });
 
-process.on('SIGINT', async () => {
-  await mongoose.connection.close();
-  process.exit(0);
-});
+// Process handlers removed for serverless compatibility (Vercel doesn't use them predictably)
 
 export default mongoose;

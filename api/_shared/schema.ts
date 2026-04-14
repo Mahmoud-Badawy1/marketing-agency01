@@ -23,6 +23,8 @@ const leadSchema = new mongoose.Schema({
   status: { type: String, default: 'new' }
 }, { timestamps: true });
 
+leadSchema.index({ createdAt: -1 });
+
 export const Lead = mongoose.model('Lead', leadSchema);
 
 // Order Schema
@@ -49,6 +51,9 @@ const orderSchema = new mongoose.Schema({
   originalAmount: Number,
 }, { timestamps: true });
 
+orderSchema.index({ userId: 1 });
+orderSchema.index({ createdAt: -1 });
+
 export const Order = mongoose.model('Order', orderSchema);
 
 // Trial Booking Schema (Strategy Call)
@@ -68,6 +73,9 @@ const trialBookingSchema = new mongoose.Schema({
   adminNotes: String,
   reminderSent: { type: Boolean, default: false }
 }, { timestamps: true });
+
+trialBookingSchema.index({ userId: 1 });
+trialBookingSchema.index({ createdAt: -1 });
 
 export const TrialBooking = mongoose.model('TrialBooking', trialBookingSchema);
 
@@ -162,6 +170,8 @@ const otpCodeSchema = new mongoose.Schema({
   attempts: { type: Number, default: 0 }
 }, { timestamps: true });
 
+otpCodeSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+
 export const OtpCode = mongoose.model('OtpCode', otpCodeSchema);
 
 // Availability Slot Schema (Phase 2)
@@ -177,7 +187,27 @@ const availabilitySlotSchema = new mongoose.Schema({
   recurrenceType: { type: String, enum: ['none', 'weekly', 'monthly', 'annually'], default: 'none' }
 }, { timestamps: true });
 
+availabilitySlotSchema.index({ date: 1, startTime: 1 });
+availabilitySlotSchema.index({ recurrenceId: 1 });
+
 export const AvailabilitySlot = mongoose.model('AvailabilitySlot', availabilitySlotSchema);
+
+// Admin Session Schema
+const adminSessionSchema = new mongoose.Schema({
+  token: { type: String, required: true, unique: true },
+  ip: { type: String },
+  createdAt: { type: Date, default: Date.now, expires: 8 * 60 * 60 } // 8 hours TTL
+});
+export const AdminSession = mongoose.model('AdminSession', adminSessionSchema);
+
+// Login Attempt Schema
+const loginAttemptSchema = new mongoose.Schema({
+  ip: { type: String, required: true, unique: true },
+  count: { type: Number, default: 1 },
+  lockedUntil: { type: Date },
+  createdAt: { type: Date, default: Date.now, expires: 15 * 60 } // 15 mins TTL
+});
+export const LoginAttempt = mongoose.model('LoginAttempt', loginAttemptSchema);
 
 // Validation Schemas
 export const insertUserSchema = z.object({
@@ -234,11 +264,16 @@ export const insertSettingSchema = z.object({
   value: z.any()
 });
 
+const bilingualString = z.union([
+  z.string(), 
+  z.object({ ar: z.string(), en: z.string().optional() })
+]);
+
 export const insertTestimonialSchema = z.object({
-  name: z.any(),
-  role: z.any().optional(),
+  name: bilingualString,
+  role: bilingualString.optional(),
   whatsappImage: z.string().optional(),
-  defaultText: z.any().optional(),
+  defaultText: bilingualString.optional(),
   isActive: z.boolean().optional(),
   order: z.number().optional()
 });
@@ -443,6 +478,10 @@ export interface ExpertApplicationType {
   availableHours: string;
   motivation?: string | null;
   cvUrl?: string | null;
+  resumeUrl?: string | null;
+  portfolioUrl?: string | null;
+  linkedinUrl?: string | null;
+  areasOfExpertise?: any | null;
   status?: string | null;
   adminNotes?: string | null;
   createdAt?: string | Date;

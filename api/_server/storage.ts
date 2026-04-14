@@ -58,6 +58,11 @@ export interface IStorage {
   getSetting(key: string): Promise<SiteSettingType | null>;
   getSettings(): Promise<SiteSettingType[]>;
   upsertSetting(key: string, value: any): Promise<SiteSettingType>;
+  
+  // Counts
+  getLeadsCount(): Promise<number>;
+  getTrialBookingsCount(): Promise<number>;
+  getOrdersCount(): Promise<number>;
   // Coupon methods
   createCoupon(coupon: InsertCoupon): Promise<CouponType>;
   getCoupons(): Promise<CouponType[]>;
@@ -140,7 +145,17 @@ export class DatabaseStorage implements IStorage {
     }
     
     // Increment attempts
-    await OtpCode.updateOne({ email: email.toLowerCase() }, { $inc: { attempts: 1 } });
+    const updated = await OtpCode.findOneAndUpdate(
+      { email: email.toLowerCase() },
+      { $inc: { attempts: 1 } },
+      { new: true }
+    );
+    
+    // Lockout after 5 attempt failures (OTP is burned)
+    if (updated && updated.attempts >= 5) {
+      await OtpCode.deleteOne({ email: email.toLowerCase() });
+    }
+    
     return false;
   }
 
@@ -156,6 +171,10 @@ export class DatabaseStorage implements IStorage {
 
   async getLeads(): Promise<LeadType[]> {
     return await Lead.find().sort({ createdAt: -1 }).lean() as unknown as LeadType[];
+  }
+
+  async getLeadsCount(): Promise<number> {
+    return await Lead.countDocuments();
   }
 
   async updateLeadStatus(id: string, status: string): Promise<LeadType | null> {
@@ -188,6 +207,10 @@ export class DatabaseStorage implements IStorage {
     return await Order.find().sort({ createdAt: -1 }).lean() as unknown as OrderType[];
   }
 
+  async getOrdersCount(): Promise<number> {
+    return await Order.countDocuments();
+  }
+
   async getUserOrders(userId: string): Promise<OrderType[]> {
     return await Order.find({ userId }).sort({ createdAt: -1 }).lean() as unknown as OrderType[];
   }
@@ -204,6 +227,10 @@ export class DatabaseStorage implements IStorage {
 
   async getTrialBookings(): Promise<TrialBookingType[]> {
     return await TrialBooking.find().sort({ createdAt: -1 }).lean() as unknown as TrialBookingType[];
+  }
+
+  async getTrialBookingsCount(): Promise<number> {
+    return await TrialBooking.countDocuments();
   }
 
   async getUserTrialBookings(userId: string): Promise<TrialBookingType[]> {
@@ -317,8 +344,14 @@ export class DatabaseStorage implements IStorage {
   }
 
   async incrementCouponUsage(id: string, phone: string, orderId: string, seatsUsed: number): Promise<CouponType | null> {
-    return await Coupon.findByIdAndUpdate(
-      id,
+    return await Coupon.findOneAndUpdate(
+      {
+        _id: id,
+        $or: [
+          { maxTotalUses: 0 },
+          { $expr: { $lt: ["$currentUses", "$maxTotalUses"] } }
+        ]
+      },
       {
         $inc: { currentUses: 1 },
         $push: { usageLog: { phone, orderId, seatsUsed, usedAt: new Date() } }
@@ -388,8 +421,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async incrementSlotBooking(slotId: string): Promise<boolean> {
-    const result = await AvailabilitySlot.findByIdAndUpdate(
-      slotId,
+    const result = await AvailabilitySlot.findOneAndUpdate(
+      { _id: slotId, $expr: { $lt: ["$totalBooked", "$capacity"] } },
       { $inc: { totalBooked: 1 } },
       { new: true }
     );

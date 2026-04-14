@@ -14,6 +14,10 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useState } from "react";
+import { useSmartSearch } from "@/hooks/use-smart-search";
+import { exportToExcel } from "@/hooks/use-excel-export";
+import { AdminSearchBar } from "../AdminSearchBar";
+import { ExportButton } from "../ExportButton";
 import { Info, MessageSquare, User, Phone, Mail, Building2, Wallet, Settings } from "lucide-react";
 
 export function LeadsTab() {
@@ -46,13 +50,49 @@ export function LeadsTab() {
     },
   });
 
+  const [searchQuery, setSearchQuery] = useState("");
+  
+  const filteredLeads = useSmartSearch(leads, ['clientName', 'email', 'phone', 'companyName', 'message', 'serviceInterest'], searchQuery);
+
+  const handleExport = () => {
+    exportToExcel(
+      filteredLeads,
+      [
+        { key: 'clientName', header: 'اسم العميل' },
+        { key: 'email', header: 'البريد' },
+        { key: 'phone', header: 'الهاتف' },
+        { key: 'monthlyBudget', header: 'الميزانية' },
+        { key: 'companyName', header: 'الشركة' },
+        { key: 'serviceInterest', header: 'الخدمة', formatter: (val) => formatServiceInterest(val as string) },
+        { key: 'message', header: 'الرسالة' },
+        { key: 'status', header: 'الحالة' },
+        { key: 'createdAt', header: 'التاريخ', formatter: (val) => formatDate(val as string) },
+      ],
+      `leads_export_${new Date().toISOString().split('T')[0]}`
+    );
+  };
+
   if (isLoading) {
     return <div className="text-center py-8 text-muted-foreground" data-testid="loading-leads">جاري التحميل...</div>;
   }
 
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-sm" data-testid="table-leads">
+    <div className="space-y-4">
+      <div className="flex flex-col sm:flex-row gap-4 justify-between">
+        <div className="flex-1">
+          <AdminSearchBar 
+            value={searchQuery}
+            onChange={setSearchQuery}
+            placeholder="ابحث بالاسم، الهاتف، البريد، الشركة، الرسالة..."
+            resultCount={filteredLeads.length}
+            totalCount={leads.length}
+          />
+        </div>
+        <ExportButton onExport={handleExport} className="shrink-0" />
+      </div>
+      
+      <div className="overflow-x-auto rounded-xl border bg-card">
+        <table className="w-full text-sm" data-testid="table-leads">
         <thead>
           <tr className="border-b">
             <th className="text-right p-3 font-medium">اسم العميل</th>
@@ -68,7 +108,7 @@ export function LeadsTab() {
           </tr>
         </thead>
         <tbody>
-          {leads.map((lead) => (
+          {filteredLeads.map((lead) => (
             <tr key={lead._id} className="border-b" data-testid={`row-lead-${lead._id}`}>
               <td className="p-3" data-testid={`text-lead-name-${lead._id}`}>{lead.clientName}</td>
               <td className="p-3 text-xs">{lead.email}</td>
@@ -181,13 +221,16 @@ export function LeadsTab() {
               </td>
             </tr>
           ))}
-          {leads.length === 0 && (
+          {filteredLeads.length === 0 && (
             <tr>
-              <td colSpan={9} className="p-8 text-center text-muted-foreground" data-testid="text-no-leads">لا توجد رسائل</td>
+              <td colSpan={10} className="p-8 text-center text-muted-foreground">
+                لا يوجد نتائج للبحث العالي
+              </td>
             </tr>
           )}
         </tbody>
       </table>
+    </div>
     </div>
   );
 }

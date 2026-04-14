@@ -12,6 +12,10 @@ import { Eye, FileText, Edit3, Save, X, Trash2 } from "lucide-react";
 import { SiWhatsapp } from "react-icons/si";
 import { formatDate } from "../utils/formatters";
 import type { ExpertApplicationType } from "@shared/schema";
+import { useSmartSearch } from "@/hooks/use-smart-search";
+import { exportToExcel } from "@/hooks/use-excel-export";
+import { AdminSearchBar } from "../AdminSearchBar";
+import { ExportButton } from "../ExportButton";
 
 function ExpertApplicationStatusBadge({ status }: { status: string | null | undefined }) {
   if (status === "new" || !status) {
@@ -115,13 +119,52 @@ export function ExpertApplicationsTab() {
     setNotesText("");
   };
 
+  const [searchQuery, setSearchQuery] = useState("");
+  
+  const filteredApplications = useSmartSearch(applications, ['fullName', 'email', 'phone', 'specialization', 'motivation', 'areasOfExpertise', 'portfolioUrl', 'linkedinUrl'], searchQuery);
+
+  const handleExport = () => {
+    exportToExcel(
+      filteredApplications,
+      [
+        { key: 'fullName', header: 'الاسم' },
+        { key: 'email', header: 'البريد' },
+        { key: 'phone', header: 'الهاتف' },
+        { key: 'motivation', header: 'الدافع (نبذة)' },
+        { key: 'cvUrl', header: 'السيرة الذاتية' },
+        { key: 'portfolioUrl', header: 'رابط الأعمال' },
+        { key: 'linkedinUrl', header: 'رابط لينكد إن' },
+        { key: 'areasOfExpertise', header: 'مجالات الخبرة', formatter: (val) => Array.isArray(val) ? val.join(', ') : val },
+        { key: 'experienceYears', header: 'سنوات الخبرة' },
+        { key: 'status', header: 'الحالة' },
+        { key: 'adminNotes', header: 'ملاحظات' },
+        { key: 'createdAt', header: 'تاريخ التقديم', formatter: (val) => formatDate(val as string) },
+      ],
+      `experts_export_${new Date().toISOString().split('T')[0]}`
+    );
+  };
+
   if (isLoading) {
     return <div className="text-center py-8 text-muted-foreground">جاري التحميل...</div>;
   }
 
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-sm">
+    <div className="space-y-4">
+      <div className="flex flex-col sm:flex-row gap-4 justify-between">
+        <div className="flex-1">
+          <AdminSearchBar 
+            value={searchQuery}
+            onChange={setSearchQuery}
+            placeholder="ابحث بالاسم، الهاتف، البريد، النبذة، أو مجالات الخبرة..."
+            resultCount={filteredApplications.length}
+            totalCount={applications.length}
+          />
+        </div>
+        <ExportButton onExport={handleExport} className="shrink-0" />
+      </div>
+
+      <div className="overflow-x-auto rounded-xl border bg-card">
+        <table className="w-full text-sm">
         <thead>
           <tr className="border-b">
             <th className="text-right p-3 font-medium">الاسم</th>
@@ -136,7 +179,7 @@ export function ExpertApplicationsTab() {
           </tr>
         </thead>
         <tbody>
-          {applications.map((app) => (
+          {filteredApplications.map((app) => (
             <tr key={app._id} className="border-b">
               <td className="p-3">
                 <div className="font-medium">{app.fullName}</div>
@@ -289,15 +332,16 @@ export function ExpertApplicationsTab() {
               </td>
             </tr>
           ))}
-          {applications.length === 0 && (
+          {filteredApplications.length === 0 && (
             <tr>
               <td colSpan={9} className="p-8 text-center text-muted-foreground">
-                لا توجد طلبات انضمام
+                لا يوجد نتائج للبحث العالي
               </td>
             </tr>
           )}
         </tbody>
       </table>
+    </div>
     </div>
   );
 }

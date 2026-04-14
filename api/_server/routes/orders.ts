@@ -50,7 +50,12 @@ router.post("/orders", async (req, res) => {
     });
 
     if (couponId && couponDiscount > 0) {
-      await storage.incrementCouponUsage(couponId, order.phone, (newOrder as any)._id.toString(), 1);
+      const incremented = await storage.incrementCouponUsage(couponId, order.phone, (newOrder as any)._id.toString(), 1);
+      if (!incremented) {
+        // Rollback the order creation if the coupon exceeded max uses between verification and claim
+        await storage.cancelOrder((newOrder as any)._id.toString(), "فشل تفعيل الكوبون لتجاوز الحد الأقصى");
+        return res.status(400).json({ message: "نأسف، لقد نفد الحد الأقصى لاستخدام هذا الكوبون." });
+      }
     }
 
     // Background sync to HubSpot
@@ -112,7 +117,19 @@ router.get("/user/orders", userAuth, async (req, res) => {
 router.put("/user/orders/:id/cancel", userAuth, async (req, res) => {
   try {
     const id = req.params.id as string;
+    const userId = (req as any).userAuth?.id;
     const { reason } = req.body;
+    
+    if (!userId) return res.status(401).json({ message: "غير مصرح" });
+    
+    // Verify ownership
+    const userOrders = await storage.getUserOrders(userId);
+    const orderExists = userOrders.find(o => o._id.toString() === id);
+    
+    if (!orderExists) {
+      return res.status(404).json({ message: "الطلب غير موجود" });
+    }
+
     const order = await storage.cancelOrder(id, reason);
     if (!order) return res.status(404).json({ message: "الطلب غير موجود" });
     res.json(order);

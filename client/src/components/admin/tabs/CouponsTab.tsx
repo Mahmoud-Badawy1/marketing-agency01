@@ -28,6 +28,11 @@ import {
 import { Plus, Pencil, Trash2, Copy, Tag, Clock, Users, Ticket, TrendingUp, ChevronDown, ChevronUp } from "lucide-react";
 import { BilingualInput } from "../settings/BilingualInput";
 import type { CouponType } from "@shared/schema";
+import { useSmartSearch } from "@/hooks/use-smart-search";
+import { exportToExcel } from "@/hooks/use-excel-export";
+import { AdminSearchBar } from "../AdminSearchBar";
+import { ExportButton } from "../ExportButton";
+import { formatDate } from "../utils/formatters";
 
 interface CouponFormData {
   code: string;
@@ -250,12 +255,47 @@ export function CouponsTab() {
     return { label: "نشط", variant: "default" as const };
   };
 
+  const [searchQuery, setSearchQuery] = useState("");
+  
+  const filteredCoupons = useSmartSearch(coupons, ['code', 'description'], searchQuery);
+
+  const handleExport = () => {
+    exportToExcel(
+      filteredCoupons,
+      [
+        { key: 'code', header: 'الكود' },
+        { key: 'description', header: 'الوصف', formatter: (val: any) => typeof val === 'object' && val ? (val.ar || val.en) : val },
+        { key: 'discountType', header: 'نوع الخصم', formatter: (val) => val === 'percentage' ? 'نسبة %' : 'مبلغ ثابت' },
+        { key: 'discountValue', header: 'قيمة الخصم' },
+        { key: 'currentUses', header: 'تم الاستخدام' },
+        { key: 'maxTotalUses', header: 'الحد الأقصى للإستخدام' },
+        { key: 'isActive', header: 'مفعّل', formatter: (val) => val ? 'نعم' : 'لا' },
+        { key: 'startDate', header: 'تاريخ البداية', formatter: (val) => val ? formatDate(val as string) : 'غير محدد' },
+        { key: 'endDate', header: 'تاريخ النهاية', formatter: (val) => val ? formatDate(val as string) : 'غير محدد' },
+      ],
+      `coupons_export_${new Date().toISOString().split('T')[0]}`
+    );
+  };
+
   if (isLoading) {
     return <p className="text-center text-muted-foreground py-8">جارٍ التحميل...</p>;
   }
 
   return (
     <div className="space-y-4">
+      <div className="flex flex-col sm:flex-row gap-4 justify-between">
+        <div className="flex-1">
+          <AdminSearchBar 
+            value={searchQuery}
+            onChange={setSearchQuery}
+            placeholder="ابحث بكود الخصم أو الوصف..."
+            resultCount={filteredCoupons.length}
+            totalCount={coupons.length}
+          />
+        </div>
+        <ExportButton onExport={handleExport} className="shrink-0" />
+      </div>
+
       {/* Header */}
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <div className="flex items-center gap-2">
@@ -279,7 +319,7 @@ export function CouponsTab() {
 
       {/* Coupons list */}
       <div className="space-y-3">
-        {coupons.map((coupon) => {
+        {filteredCoupons.map((coupon) => {
           const status = getCouponStatus(coupon);
           const isExpanded = expandedId === coupon._id;
 
@@ -386,6 +426,11 @@ export function CouponsTab() {
             </div>
           );
         })}
+        {filteredCoupons.length === 0 && coupons.length > 0 && (
+          <div className="text-center py-12 text-muted-foreground border rounded-lg bg-card">
+            <p className="text-lg font-medium">لا يوجد نتائج للبحث العالي</p>
+          </div>
+        )}
       </div>
 
       {/* Create / Edit Dialog */}

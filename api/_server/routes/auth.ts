@@ -2,17 +2,15 @@ import { Router } from "express";
 import { storage } from "../storage.js";
 import { generateOtp, sendOtpEmail, generateToken, userAuth, hashPassword, verifyPassword } from "../auth.js";
 import crypto from "crypto";
+import { sanitizeUser } from "../sanitize.js";
 import {
   adminAuth,
+  adminLogout,
   getClientIp,
   isLoginRateLimited,
   safeCompare,
   ADMIN_PASSWORD,
-  cleanupSessions,
-  loginAttempts,
   generateSessionToken,
-  sessions,
-  SESSION_DURATION,
   recordFailedAttempt
 } from "./common.js";
 
@@ -78,7 +76,7 @@ router.post("/auth/verify-otp", async (req, res) => {
     }
 
     const token = generateToken(user!._id, user!.role, sessionId);
-    res.json({ token, user, isNew: !user!.password });
+    res.json({ token, user: sanitizeUser(user), isNew: !user!.password });
   } catch (err) {
     res.status(500).json({ message: "حدث خطأ أثناء التحقق" });
   }
@@ -106,7 +104,7 @@ router.post("/auth/login", async (req, res) => {
     });
 
     const token = generateToken(user._id, user.role, sessionId);
-    res.json({ token, user: updatedUser });
+    res.json({ token, user: sanitizeUser(updatedUser) });
   } catch (err) {
     res.status(500).json({ message: "حدث خطأ أثناء تسجيل الدخول" });
   }
@@ -204,7 +202,7 @@ router.get("/auth/me", userAuth, async (req, res) => {
   try {
     const user = await storage.getUserAccount((req as any).userAuth?.id || "");
     if (!user) return res.status(404).json({ message: "المستخدم غير موجود" });
-    res.json({ user });
+    res.json({ user: sanitizeUser(user) });
   } catch (error) {
     res.status(500).json({ message: "خطأ في الخادم" });
   }
@@ -215,17 +213,17 @@ router.put("/user/profile", userAuth, async (req, res) => {
     const { name, phone } = req.body;
     const updated = await storage.updateUserAccount((req as any).userAuth?.id || "", { name, phone });
     if (!updated) return res.status(404).json({ message: "المستخدم غير موجود" });
-    res.json({ message: "تم تحديث البيانات بنجاح", user: updated });
+    res.json({ message: "تم تحديث البيانات بنجاح", user: sanitizeUser(updated) });
   } catch (error) {
     res.status(500).json({ message: "خطأ في تحديث البيانات" });
   }
 });
 
 // Admin Auth
-router.post("/admin/login", (req, res) => {
+router.post("/admin/login", async (req, res) => {
   const ip = getClientIp(req);
 
-  const rateLimitCheck = isLoginRateLimited(ip);
+  const rateLimitCheck = await isLoginRateLimited(ip);
   if (rateLimitCheck.limited) {
     return res.status(429).json({
       message: `تم تجاوز عدد المحاولات. حاول بعد ${rateLimitCheck.retryAfter} ثانية`,
@@ -238,16 +236,15 @@ router.post("/admin/login", (req, res) => {
     return res.status(400).json({ message: "كلمة المرور مطلوبة" });
   }
 
-  if (safeCompare(password, ADMIN_PASSWORD)) {
-    cleanupSessions();
-    loginAttempts.delete(ip);
+  if (safeCompare(password, ADMIN_PASSWORD!)) {
+    // We export clearLoginAttempts from common to clear them
+    await import("./common.js").then(m => m.clearLoginAttempts(ip));
 
-    const token = generateSessionToken();
-    sessions.set(token, { createdAt: Date.now(), ip });
+    const token = await generateSessionToken(ip);
 
-    res.json({ success: true, token, expiresIn: SESSION_DURATION });
+    res.json({ success: true, token, expiresIn: 8 * 60 * 60 * 1000 });
   } else {
-    const remaining = recordFailedAttempt(ip);
+    const remaining = await recordFailedAttempt(ip);
     res.status(401).json({
       message:
         remaining > 0
@@ -261,10 +258,7 @@ router.get("/admin/verify", adminAuth, (_req, res) => {
   res.json({ valid: true });
 });
 
-router.post("/admin/logout", adminAuth, (req, res) => {
-  const token = req.headers.authorization?.split(" ")[1];
-  if (token) sessions.delete(token);
-  res.json({ success: true });
-});
+router.post("/admin/logout", adminAuth, adminLogout);
+
 
 export default router;

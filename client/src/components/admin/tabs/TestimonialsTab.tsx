@@ -11,6 +11,10 @@ import { Label } from "@/components/ui/label";
 import { Plus, Trash2, Edit3, Save, X, Upload } from "lucide-react";
 import { BilingualInput } from "../settings/BilingualInput";
 import type { TestimonialType } from "@shared/schema";
+import { useSmartSearch } from "@/hooks/use-smart-search";
+import { exportToExcel } from "@/hooks/use-excel-export";
+import { AdminSearchBar } from "../AdminSearchBar";
+import { ExportButton } from "../ExportButton";
 
 export function TestimonialsTab() {
   const { toast } = useToast();
@@ -219,12 +223,45 @@ export function TestimonialsTab() {
     }
   };
 
+  const [searchQuery, setSearchQuery] = useState("");
+  
+  const filteredTestimonials = useSmartSearch(testimonials, ['name', 'role', 'defaultText'], searchQuery);
+
+  const handleExport = () => {
+    exportToExcel(
+      filteredTestimonials,
+      [
+        { key: 'name', header: 'الاسم', formatter: (val: any) => typeof val === 'object' && val ? (val.ar || val.en) : val },
+        { key: 'role', header: 'الدور/الوصف', formatter: (val: any) => typeof val === 'object' && val ? (val.ar || val.en) : val },
+        { key: 'defaultText', header: 'النص الافتراضي', formatter: (val: any) => typeof val === 'object' && val ? (val.ar || val.en) : val },
+        { key: 'whatsappImage', header: 'رابط صورة واتساب' },
+        { key: 'order', header: 'الترتيب' },
+        { key: 'isActive', header: 'مفعل', formatter: (val) => val ? 'نعم' : 'لا' },
+        { key: 'createdAt', header: 'تاريخ الإضافة', formatter: (val) => val ? new Date(val as string).toLocaleDateString("ar-EG") : '-' },
+      ],
+      `testimonials_export_${new Date().toISOString().split('T')[0]}`
+    );
+  };
+
   if (isLoading) {
     return <div className="text-center py-8 text-muted-foreground">جاري التحميل...</div>;
   }
 
   return (
     <div className="space-y-4">
+      <div className="flex flex-col sm:flex-row gap-4 justify-between">
+        <div className="flex-1">
+          <AdminSearchBar 
+            value={searchQuery}
+            onChange={setSearchQuery}
+            placeholder="ابحث باسم العميل أو الوصف أو نص الرأي..."
+            resultCount={filteredTestimonials.length}
+            totalCount={testimonials.length}
+          />
+        </div>
+        <ExportButton onExport={handleExport} className="shrink-0" />
+      </div>
+
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <p className="text-sm text-muted-foreground">إدارة آراء العملاء المعروضة على الموقع</p>
         <Button
@@ -343,7 +380,7 @@ export function TestimonialsTab() {
             </tr>
           </thead>
           <tbody>
-            {testimonials.map((t) => (
+            {filteredTestimonials.map((t) => (
               <tr key={t._id} className="border-b">
                 <td className="p-3">
                   {typeof (t.name as any) === 'string' ? t.name : ((t.name as any)?.ar || (t.name as any)?.en)}
@@ -394,9 +431,11 @@ export function TestimonialsTab() {
                 </td>
               </tr>
             ))}
-            {testimonials.length === 0 && (
+            {filteredTestimonials.length === 0 && (
               <tr>
-                <td colSpan={5} className="p-8 text-center text-muted-foreground">لا توجد آراء بعد</td>
+                <td colSpan={5} className="p-8 text-center text-muted-foreground">
+                  {testimonials.length === 0 ? "لا توجد آراء بعد" : "لا يوجد نتائج للبحث العالي"}
+                </td>
               </tr>
             )}
           </tbody>

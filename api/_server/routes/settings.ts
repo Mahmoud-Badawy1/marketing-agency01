@@ -11,8 +11,12 @@ const router = Router();
 router.get("/settings", async (_req, res) => {
   try {
     const settings = await storage.getSettings();
+    const SENSITIVE_KEYS = ["SMTP_HOST", "SMTP_PORT", "SMTP_USER", "SMTP_PASS", "SENDER_EMAIL", "HUBSPOT_ACCESS_TOKEN"];
+
     const settingsObj = settings.reduce((acc: any, setting: any) => {
-      acc[setting.key] = setting.value;
+      if (!SENSITIVE_KEYS.includes(setting.key)) {
+        acc[setting.key] = setting.value;
+      }
       return acc;
     }, {} as any);
     res.json(settingsObj);

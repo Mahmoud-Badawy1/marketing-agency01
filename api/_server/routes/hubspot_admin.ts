@@ -10,9 +10,9 @@ const router = Router();
  */
 router.get("/admin/hubspot/preview", adminAuth, adminApiRateLimit, async (_req, res) => {
   try {
-    const leadsCount = await storage.getLeads().then(l => l.length);
-    const trialsCount = await storage.getTrialBookings().then(t => t.length);
-    const ordersCount = await storage.getOrders().then(o => o.length);
+    const leadsCount = await storage.getLeadsCount();
+    const trialsCount = await storage.getTrialBookingsCount();
+    const ordersCount = await storage.getOrdersCount();
 
     res.json({
       leads: leadsCount,

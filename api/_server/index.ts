@@ -21,6 +21,31 @@ app.use((_req, res, next) => {
   res.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
   res.set("X-DNS-Prefetch-Control", "off");
   res.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
+  res.set("Content-Security-Policy", "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline' fonts.googleapis.com; img-src 'self' data: res.cloudinary.com; font-src 'self' fonts.gstatic.com; connect-src 'self';");
+  next();
+});
+
+// CORS Config
+app.use((req, res, next) => {
+  const allowedOrigins = process.env.NODE_ENV === "production" ? [
+    "https://marketerpro.agency",
+    "https://www.marketerpro.agency",
+    process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : ""
+  ].filter(Boolean) : ["http://localhost:3000", "http://localhost:5173"];
+  
+  const origin = req.headers.origin;
+  if (origin && allowedOrigins.includes(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+    res.setHeader("Vary", "Origin");
+  }
+  
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  
+  if (req.method === "OPTIONS") {
+    return res.status(204).end();
+  }
+  
   next();
 });
 
@@ -62,6 +87,7 @@ declare module "http" {
 // Parse body BEFORE prerender middleware
 app.use(
   express.json({
+    limit: '1mb',
     verify: (req, _res, buf) => {
       req.rawBody = buf;
     },

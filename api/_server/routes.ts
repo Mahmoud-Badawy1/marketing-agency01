@@ -62,6 +62,16 @@ export async function registerRoutes(
   // ✅ Enable response compression for faster content delivery
   app.use(compression());
 
+  // Health Check Endpoint
+  app.get("/api/health", (_req, res) => {
+    res.json({
+      status: "ok",
+      uptime: process.uptime(),
+      dbConnected: mongoose.connection.readyState === 1,
+      memoryUsage: process.memoryUsage()
+    });
+  });
+
   // Apply DB check to all API routes
   app.use("/api", dbCheck);
 

@@ -4,8 +4,6 @@ import "./_server/db.js";
 import { ZodError, z } from "zod";
 import { registerRoutes } from "./_server/routes.js";
 import { createServer } from "http";
-import { v2 as cloudinary } from "cloudinary";
-import multer from "multer";
 import prerender from "prerender-node";
 
 // Extend Express Request type
@@ -17,66 +15,8 @@ declare global {
   }
 }
 
-// Configure Cloudinary
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
-
-// Configure multer for memory storage
-const upload = multer({
-  storage: multer.memoryStorage(),
-  limits: { fileSize: 10 * 1024 * 1024 },
-  fileFilter: (_req: any, file: any, cb: any) => {
-    const allowed = /jpeg|jpg|png|webp/;
-    const ext = allowed.test(file.originalname.toLowerCase());
-    const mime = allowed.test(file.mimetype);
-    cb(null, ext && mime);
-  },
-});
-
-// Configure multer for CV uploads (PDF files)
-const uploadCV = multer({
-  storage: multer.memoryStorage(),
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
-  fileFilter: (_req: any, file: any, cb: any) => {
-    const isPdf = file.mimetype === 'application/pdf';
-    cb(null, isPdf);
-  },
-});
-
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "abqary2026";
-
-function adminAuth(req: Request, res: Response, next: NextFunction) {
-  const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({ message: "غير مصرح" });
-  }
-  const token = authHeader.split(" ")[1];
-  if (token !== ADMIN_PASSWORD) {
-    return res.status(401).json({ message: "كلمة المرور غير صحيحة" });
-  }
-  next();
-}
-
-// Helper to upload buffer to Cloudinary
-function uploadToCloudinary(
-  buffer: Buffer,
-  folder: string,
-  resourceType: "image" | "raw" = "image"
-): Promise<{ secure_url: string }> {
-  return new Promise((resolve, reject) => {
-    const stream = cloudinary.uploader.upload_stream(
-      { folder, resource_type: resourceType },
-      (error, result) => {
-        if (error) reject(error);
-        else resolve(result as { secure_url: string });
-      }
-    );
-    stream.end(buffer);
-  });
-}
+// Removed duplicated Cloudinary, multer, and adminAuth configurations.
+// These are managed centrally in _server/routes/common.ts
 
 const app = express();
 

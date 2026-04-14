@@ -15,6 +15,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Edit2, ExternalLink, Calendar, MessageSquare, XCircle, Trash2, Info, User, Phone, Mail, Building2, Settings } from "lucide-react";
 import { DialogTrigger } from "@/components/ui/dialog";
+import { useSmartSearch } from "@/hooks/use-smart-search";
+import { exportToExcel } from "@/hooks/use-excel-export";
+import { AdminSearchBar } from "../AdminSearchBar";
+import { ExportButton } from "../ExportButton";
 
 export function TrialsTab() {
   const { toast } = useToast();
@@ -117,13 +121,50 @@ export function TrialsTab() {
     });
   };
 
+  const [searchQuery, setSearchQuery] = useState("");
+  
+  const filteredBookings = useSmartSearch(bookings, ['clientName', 'email', 'phone', 'companyName'], searchQuery);
+
+  const handleExport = () => {
+    exportToExcel(
+      filteredBookings,
+      [
+        { key: 'clientName', header: 'اسم العميل' },
+        { key: 'email', header: 'البريد' },
+        { key: 'phone', header: 'الهاتف' },
+        { key: 'companyName', header: 'الشركة' },
+        { key: 'serviceInterest', header: 'الخدمة', formatter: (val) => formatServiceInterest(val as string) },
+        { key: 'status', header: 'الحالة' },
+        { key: 'scheduledTime', header: 'الموعد', formatter: (val) => val ? formatDate(val as string) : 'لم يحدد' },
+        { key: 'cancelReason', header: 'سبب الإلغاء/التعديل' },
+        { key: 'adminNotes', header: 'ملاحظات المسؤول' },
+        { key: 'createdAt', header: 'تاريخ الطلب', formatter: (val) => formatDate(val as string) },
+      ],
+      `trials_export_${new Date().toISOString().split('T')[0]}`
+    );
+  };
+
   if (isLoading) {
     return <div className="text-center py-8 text-muted-foreground" data-testid="loading-trials">جاري التحميل...</div>;
   }
 
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-sm" data-testid="table-trials" dir="rtl">
+    <div className="space-y-4">
+      <div className="flex flex-col sm:flex-row gap-4 justify-between">
+        <div className="flex-1">
+          <AdminSearchBar 
+            value={searchQuery}
+            onChange={setSearchQuery}
+            placeholder="ابحث بالاسم، الهاتف، البريد، أو الشركة..."
+            resultCount={filteredBookings.length}
+            totalCount={bookings.length}
+          />
+        </div>
+        <ExportButton onExport={handleExport} className="shrink-0" />
+      </div>
+
+      <div className="overflow-x-auto rounded-xl border bg-card">
+        <table className="w-full text-sm" data-testid="table-trials" dir="rtl">
         <thead>
           <tr className="border-b">
             <th className="text-right p-3 font-medium">اسم العميل</th>
@@ -138,7 +179,7 @@ export function TrialsTab() {
           </tr>
         </thead>
         <tbody>
-          {bookings.map((booking) => (
+          {filteredBookings.map((booking) => (
             <tr key={booking._id} className="border-b hover:bg-muted/30 transition-colors" data-testid={`row-trial-${booking._id}`}>
               <td className="p-3 font-medium" data-testid={`text-trial-name-${booking._id}`}>{booking.clientName}</td>
               <td className="p-3 text-xs" data-testid={`text-trial-email-${booking._id}`}>{booking.email}</td>
@@ -267,13 +308,16 @@ export function TrialsTab() {
               </td>
             </tr>
           ))}
-          {bookings.length === 0 && (
+          {filteredBookings.length === 0 && (
             <tr>
-              <td colSpan={9} className="p-8 text-center text-muted-foreground" data-testid="text-no-trials">لا توجد استشارات محجوزة</td>
+              <td colSpan={9} className="p-8 text-center text-muted-foreground">
+                لا يوجد نتائج للبحث العالي
+              </td>
             </tr>
           )}
         </tbody>
       </table>
+    </div>
 
       {/* Edit Dialog */}
       <Dialog open={!!editingBooking} onOpenChange={(open) => !open && setEditingBooking(null)}>

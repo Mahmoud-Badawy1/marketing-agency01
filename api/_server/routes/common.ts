@@ -3,6 +3,7 @@ import crypto from "crypto";
 import { v2 as cloudinary } from 'cloudinary';
 import multer from 'multer';
 import { storage } from "../storage.js";
+import { AdminSession, LoginAttempt } from "../../_shared/schema.js";
 import sharp from 'sharp';
 
 // Configure Cloudinary
@@ -43,37 +44,37 @@ export const uploadMedia = multer({
 });
 
 export const PUBLIC_ID_MAP: Record<string, string> = {
-  mascot: 'abqary-mascot',
-  instructor: 'abqary-instructor',
+  hero: 'abqary-hero',
+  about: 'abqary-about',
+  contact: 'abqary-contact',
+  why_us: 'abqary-why-us',
   gallery1: 'abqary-gallery1',
   gallery2: 'abqary-gallery2',
   gallery3: 'abqary-gallery3',
   gallery4: 'abqary-gallery4',
   upcoming_event_bg: 'abqary-upcoming-event-bg',
-  hero_slide_1: 'abqary-hero-slide-1',
-  hero_slide_2: 'abqary-hero-slide-2',
-  hero_slide_3: 'abqary-hero-slide-3',
 };
 
-export const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "abqary2026";
+export const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
-export const sessions = new Map<string, { createdAt: number; ip: string }>();
-export const SESSION_DURATION = 8 * 60 * 60 * 1000;
+if (!ADMIN_PASSWORD) {
+  console.error("FATAL ERROR: ADMIN_PASSWORD environment variable is not set.");
+  process.exit(1);
+}
 
-export function generateSessionToken(): string {
-  return crypto.randomBytes(32).toString("hex");
+// In-memory maps deprecated: using MongoDB with TTL indexes for serverless compatibility.
+// export const sessions = new Map<string, { createdAt: number; ip: string }>();
+
+export async function generateSessionToken(ip: string): Promise<string> {
+  const token = crypto.randomBytes(32).toString("hex");
+  await AdminSession.create({ token, ip });
+  return token;
 }
 
 export function cleanupSessions(): void {
-  const now = Date.now();
-  sessions.forEach((session, token) => {
-    if (now - session.createdAt > SESSION_DURATION) {
-      sessions.delete(token);
-    }
-  });
+  // No-op: MongoDB TTL indexes handle cleanup automatically
 }
 
-export const loginAttempts = new Map<string, { count: number; firstAttempt: number; lockedUntil: number }>();
 export const MAX_LOGIN_ATTEMPTS = 5;
 export const LOCKOUT_DURATION = 15 * 60 * 1000;
 export const ATTEMPT_WINDOW = 15 * 60 * 1000;
@@ -88,39 +89,42 @@ export function getClientIp(req: Request): string {
   return req.ip || req.socket?.remoteAddress || "unknown";
 }
 
-export function isLoginRateLimited(ip: string): { limited: boolean; retryAfter?: number } {
+export async function isLoginRateLimited(ip: string): Promise<{ limited: boolean; retryAfter?: number }> {
   const now = Date.now();
-  const attempts = loginAttempts.get(ip);
-  if (!attempts) return { limited: false };
+  const attemptResult = await LoginAttempt.findOne({ ip }).lean() as any;
+  if (!attemptResult) return { limited: false };
 
-  if (attempts.lockedUntil > now) {
-    return { limited: true, retryAfter: Math.ceil((attempts.lockedUntil - now) / 1000) };
-  }
-
-  if (now - attempts.firstAttempt > ATTEMPT_WINDOW) {
-    loginAttempts.delete(ip);
-    return { limited: false };
+  if (attemptResult.lockedUntil && new Date(attemptResult.lockedUntil).getTime() > now) {
+    return { limited: true, retryAfter: Math.ceil((new Date(attemptResult.lockedUntil).getTime() - now) / 1000) };
   }
 
   return { limited: false };
 }
 
-export function recordFailedAttempt(ip: string): number {
+export async function recordFailedAttempt(ip: string): Promise<number> {
   const now = Date.now();
-  const attempts = loginAttempts.get(ip);
-
-  if (!attempts || now - attempts.firstAttempt > ATTEMPT_WINDOW) {
-    loginAttempts.set(ip, { count: 1, firstAttempt: now, lockedUntil: 0 });
+  
+  const attempt = await LoginAttempt.findOne({ ip });
+  
+  if (!attempt) {
+    await LoginAttempt.create({ ip, count: 1 });
     return MAX_LOGIN_ATTEMPTS - 1;
   }
 
-  attempts.count++;
-  if (attempts.count >= MAX_LOGIN_ATTEMPTS) {
-    attempts.lockedUntil = now + LOCKOUT_DURATION;
+  attempt.count += 1;
+  
+  if (attempt.count >= MAX_LOGIN_ATTEMPTS) {
+    attempt.lockedUntil = new Date(now + LOCKOUT_DURATION);
+    await attempt.save();
     return 0;
   }
 
-  return MAX_LOGIN_ATTEMPTS - attempts.count;
+  await attempt.save();
+  return MAX_LOGIN_ATTEMPTS - attempt.count;
+}
+
+export async function clearLoginAttempts(ip: string): Promise<void> {
+  await LoginAttempt.deleteOne({ ip });
 }
 
 export function safeCompare(a: string, b: string): boolean {
@@ -137,25 +141,35 @@ export function safeCompare(a: string, b: string): boolean {
   }
 }
 
-export function adminAuth(req: Request, res: Response, next: NextFunction) {
+export const adminAuth = async (req: Request, res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({ message: "غير مصرح" });
+    return res.status(401).json({ message: "غير مصرح - الرجاء تسجيل الدخول" });
   }
+
   const token = authHeader.split(" ")[1];
-
-  const session = sessions.get(token);
+  
+  const session = await AdminSession.findOne({ token });
   if (!session) {
-    return res.status(401).json({ message: "جلسة غير صالحة. سجّل الدخول مجدداً" });
+    return res.status(401).json({ message: "الجلسة منتهية، يرجى تسجيل الدخول مجدداً" });
   }
 
-  if (Date.now() - session.createdAt > SESSION_DURATION) {
-    sessions.delete(token);
-    return res.status(401).json({ message: "انتهت صلاحية الجلسة" });
-  }
-
+  (req as any).adminSessionId = token;
   next();
-}
+};
+
+export const adminLogout = async (req: Request, res: Response) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      const token = authHeader.split(" ")[1];
+      await AdminSession.deleteOne({ token });
+    }
+    res.json({ message: "تم تسجيل الخروج بنجاح" });
+  } catch (error) {
+    res.status(500).json({ message: "حدث خطأ أثناء تسجيل الخروج" });
+  }
+};
 
 export function adminApiRateLimit(req: Request, res: Response, next: NextFunction) {
   const ip = getClientIp(req);

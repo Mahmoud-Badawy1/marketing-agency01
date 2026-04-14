@@ -4,7 +4,11 @@ import { storage } from "./storage.js";
 import nodemailer from "nodemailer";
 import bcrypt from "bcryptjs";
 
-const JWT_SECRET = process.env.JWT_SECRET || "your_jwt_secret_key";
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  console.error("FATAL ERROR: JWT_SECRET environment variable is not set.");
+  process.exit(1);
+}
 const SENDER_NAME = "Marketer Pro Support";
 
 // Extend Request type to include user
@@ -22,7 +26,7 @@ declare global {
 export function generateToken(userId: string, role: string, sessionId?: string) {
   const payload: any = { id: userId, role };
   if (sessionId) payload.jti = sessionId;
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: '7d' });
+  return jwt.sign(payload, JWT_SECRET!, { expiresIn: '7d' });
 }
 
 export async function userAuth(req: Request, res: Response, next: NextFunction) {
@@ -33,7 +37,7 @@ export async function userAuth(req: Request, res: Response, next: NextFunction) 
 
   const token = authHeader.split(" ")[1];
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as any;
+    const decoded = jwt.verify(token, JWT_SECRET!) as any;
     
     // Check single-device enforcement if jti exists
     if (decoded.jti) {
@@ -59,6 +63,9 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
   return bcrypt.compare(password, hash);
 }
 
+let cachedTransporter: nodemailer.Transporter | null = null;
+let lastSmtpConfigStr: string = "";
+
 export async function sendOtpEmail(email: string, code: string) {
   const settings = await Promise.all([
     storage.getSetting("SMTP_HOST"),
@@ -77,45 +84,44 @@ export async function sendOtpEmail(email: string, code: string) {
   const senderEmail = sender || process.env.SENDER_EMAIL || "info@marketerpro.com";
 
   if (!smtpUser || !smtpPass) {
-    console.warn("SMTP credentials not set. OTP code is:", code);
+    const maskedEmail = email.replace(/(.{2})(.*)(@.*)/, "$1***$3");
+    console.warn(`SMTP credentials not set. OTP generated for ${maskedEmail}`);
     return;
   }
 
-  const transporter = nodemailer.createTransport({
-    host: smtpHost,
-    port: smtpPort,
-    secure: smtpPort === 465, // true for 465, false for other ports
-    auth: {
-      user: smtpUser,
-      pass: smtpPass,
-    },
-  });
+  const currentConfigStr = `${smtpHost}:${smtpPort}:${smtpUser}:${smtpPass}`;
 
-  const mailOptions = {
-    from: `"${SENDER_NAME}" <${senderEmail}>`,
-    to: email,
-    subject: "رمز التحقق الخاص بك - ماركتير برو",
-    htmlContent: `
-      <div style="font-family: Arial, sans-serif; text-align: center; padding: 20px; direction: rtl;">
-        <h2>مرحباً بك في ماركتير برو</h2>
-        <p>رمز التحقق الخاص بك هو:</p>
-        <h1 style="color: #0d9488; letter-spacing: 5px;">${code}</h1>
-        <p>هذا الرمز صالح لمدة 10 دقائق.</p>
-        <p>إذا لم تطلب هذا الرمز، يرجى تجاهل هذه الرسالة.</p>
-      </div>
-    `
-  };
+  if (!cachedTransporter || lastSmtpConfigStr !== currentConfigStr) {
+    cachedTransporter = nodemailer.createTransport({
+      host: smtpHost,
+      port: smtpPort,
+      secure: smtpPort === 465, // true for 465, false for other ports
+      auth: {
+        user: smtpUser,
+        pass: smtpPass,
+      },
+    });
+    lastSmtpConfigStr = currentConfigStr;
+  }
 
   try {
-    // Send mail using nodemailer
-    await transporter.sendMail({
-      from: mailOptions.from,
-      to: mailOptions.to,
-      subject: mailOptions.subject,
-      html: mailOptions.htmlContent // Use 'html' instead of 'htmlContent' for nodemailer
-    });
+    const mailOptions = {
+      from: `"${SENDER_NAME}" <${senderEmail}>`,
+      to: email,
+      subject: "رمز التحقق الخاص بك - ماركتير برو",
+      html: `
+        <div style="font-family: Arial, sans-serif; padding: 20px; direction: rtl;">
+          <h2>رمز التحقق من ماركتير برو</h2>
+          <p>رمز التحقق الخاص بك هو: <strong>${code}</strong></p>
+          <p>هذا الرمز صالح لمدة 10 دقائق.</p>
+          <p>إذا لم تقم بطلب هذا الرمز، يرجى تجاهل هذه الرسالة.</p>
+        </div>
+      `,
+    };
+
+    await cachedTransporter.sendMail(mailOptions);
   } catch (error) {
-    console.error("Error sending email OTP via SMTP:", error);
+    console.error(`Failed to send OTP to ${email}:`, error);
     throw error;
   }
 }
