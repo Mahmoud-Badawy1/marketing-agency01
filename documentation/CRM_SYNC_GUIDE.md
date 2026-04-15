@@ -1,54 +1,76 @@
-# HubSpot CRM Synchronization: Marketer Pro Guide
+# HubSpot CRM Synchronization Guide
 
-This guide is intended for developers and CRM managers who need to maintain or extend the HubSpot synchronization logic within the Marketer Pro platform.
+This guide is intended for developers and CRM administrators who need to maintain or extend the HubSpot synchronization logic within the Marketer Pro platform.
 
 ## 1. System Overview
 
-The synchronization service (`api/_server/hubspot.ts`) is designed for unidirectional data flow from the Marketer Pro platform to HubSpot CRM. It manages three primary business objects: Leads, Strategy Calls (Trials), and Service Orders.
+The synchronization service (`api/_server/hubspot.ts`) is designed for **unidirectional** data flow: from the Marketer Pro platform to HubSpot CRM. It handles three primary business objects: Leads, Strategy Calls (Trials), and Service Orders.
 
 ### Design Goals
-- **Consistency**: Keep HubSpot records up-to-date with every web-side conversion.
-- **Resilience**: Ensure that a failed CRM sync doesn't block the user's web experience.
-- **De-duplication**: Match existing contacts by email to prevent record bloat.
+- **Non-blocking**: CRM sync must never delay the user's web experience. All syncs run as background promises.
+- **Resilience**: A failed HubSpot sync must not fail the web API response. Errors are logged to console, execution continues.
+- **De-duplication**: Contacts are matched by `email` to prevent duplicate records.
+- **Consistency**: Status changes and deal amounts are patched back to HubSpot when updated in the admin dashboard.
 
 ## 2. Synchronization Logic
 
 ### Data Object Mapping
-- **Leads**: Synced as HubSpot **Contacts** with `lifecyclestage: lead`.
-- **Strategy Calls**: Synced as HubSpot **Contacts** with `lifecyclestage: opportunity`.
-- **Orders**: A dual-object sync.
-  1. Creates or updates the **Contact**.
-  2. Creates a **Deal** with the calculated revenue.
-  3. **Associates** the Deal with the Contact using HubSpot's association API.
 
-### Identity Management
-The system prioritizes the `email` as the unique identifier.
-- **Search First**: Before pushing data, we perform a POST search against `/contacts/search`.
-- **Patch/Post**: If a contact ID is found, we use a `PATCH` request; otherwise, we use `POST` to create a new entry.
+| Marketer Pro | HubSpot Object | Lifecycle Stage |
+| :--- | :--- | :--- |
+| **Lead** (Contact Form) | Contact | `lead` |
+| **Trial Booking** (Strategy Call) | Contact | `opportunity` |
+| **Order** (Service Purchase) | Contact + Deal | `customer` (on Deal creation) |
 
-## 3. Handling API Errors & Rate Limits
+### Order Sync (Dual-Object)
+Orders trigger the most complex sync:
+1. **Upsert Contact**: Search by email → PATCH existing or POST new contact.
+2. **Create Deal**: POST a new Deal with the order amount and plan name.
+3. **Associate**: Link the Deal to the Contact via HubSpot's v4 associations API.
 
-HubSpot's API has strict rate limits. Our implementation handles these via:
-- **Token Caching**: We cache the HubSpot Access Token in memory for 60 seconds to avoid repeated database lookups during bulk operations.
-- **Non-Blocking Execution**: Almost all sync calls are executed as background promises that do not await their response before returning a 200 OK to the client.
-- **Robustness**: If a sync fails (e.g., due to a deleted HubSpot property), the error is logged to the server console, but the system continues processing other records.
+### Identity Management (De-duplication)
+Before pushing any record, the sync service performs a POST search against `/crm/v3/objects/contacts/search` using the email address:
+- **Match found** → `PATCH /crm/v3/objects/contacts/{id}` to update details.
+- **No match** → `POST /crm/v3/objects/contacts` to create a new contact.
+
+## 3. Admin Token Management
+
+The HubSpot Access Token is stored in MongoDB under the `site_settings` key `hubspot_token`. The sync service:
+1. Reads the token from the database on first use.
+2. Caches it **in memory** for 60 seconds to avoid repeated DB lookups during bulk operations.
+3. Falls back to the `HUBSPOT_ACCESS_TOKEN` environment variable if no DB token is configured.
+
+> [!WARNING]
+> After updating the HubSpot token in Admin Settings, **the cache will persist for up to 60 seconds**. Triggering a sync immediately after a token change may use the old token momentarily.
 
 ## 4. Bulk Syncing
 
-For historical data migration or recovery, we provide a bulk sync tool.
-- **Endpoint**: `/api/admin/hubspot/sync-all` (POST, Admin-only).
-- **Execution**: Fetches all Leads, Trials, and Orders from MongoDB and processes them sequentially in a background loop.
-- **Scaling Note**: For datasets larger than 1,000 records, consider adding a delay (sleep) between batch iterations to avoid HubSpot's burst rate limits.
+For historical data migration or post-outage recovery:
 
-## 5. Maintenance & Troubleshooting
+- **Endpoint**: `POST /api/admin/hubspot/sync-all` (Admin-only)
+- **Preview**: `GET /api/admin/hubspot/preview` returns counts of all pending objects without triggering a sync.
+- **Execution**: Fetches all Leads, Trials, and Orders from MongoDB and processes them **sequentially** in a background loop (does not block the HTTP response).
 
-### Common Failure Points
-- **Property Mismatch**: If you add a new field to the `Lead` schema on the web, you must ensure a corresponding property exists in HubSpot, or the sync will return a 400 Bad Request.
-- **Expired Token**: Ensure the `HUBSPOT_ACCESS_TOKEN` in the admin settings is periodically updated if using developer app credentials.
+> [!TIP]
+> For datasets exceeding ~1,000 records, consider temporarily adding a `sleep(200)` delay between iterations to avoid triggering HubSpot's burst rate limits (150 requests/10 seconds).
 
-### Required HubSpot Properties
-Ensure your HubSpot account has the following custom properties (or their defaults) configured:
-- `monthly_budget`: (Text/Number)
-- `service_interest`: (Text)
-- `trial_status`: (Text)
-- `company`: (Text, default)
+## 5. Required HubSpot Custom Properties
+
+Ensure your HubSpot account has the following custom contact properties configured. If a property is missing, the sync will return a `400 Bad Request` for affected records.
+
+| Property Key | Type | Maps From |
+| :--- | :--- | :--- |
+| `monthly_budget` | Text / Number | `lead.monthlyBudget` |
+| `service_interest` | Text | `lead.serviceInterest` / `order.serviceInterest` |
+| `trial_status` | Text | `trial.status` |
+| `company` | Text (default) | `order.companyName` |
+
+## 6. Troubleshooting Common Failures
+
+| Symptom | Likely Cause | Fix |
+| :--- | :--- | :--- |
+| `400 Bad Request` from HubSpot | Missing custom property | Add the property in HubSpot → Properties settings |
+| `401 Unauthorized` from HubSpot | Expired or invalid access token | Update `hubspot_token` in Admin → Settings |
+| Contacts created as duplicates | Email field mismatch (leading/trailing spaces) | Verify email normalization in `getOrCreateUser()` |
+| Deals missing contact association | HubSpot association API change | Check `/crm/v4/associations` schema in HubSpot changelog |
+| Sync silently skipped | `HUBSPOT_ACCESS_TOKEN` env var not set | Set the token in Admin Settings or in `.env` |

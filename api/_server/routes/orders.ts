@@ -184,4 +184,15 @@ router.put("/admin/orders/:id/cancel", adminAuth, adminApiRateLimit, async (req,
   }
 });
 
+router.delete("/admin/orders/:id", adminAuth, adminApiRateLimit, async (req, res) => {
+  try {
+    const id = req.params.id as string;
+    const success = await storage.deleteOrder(id);
+    if (!success) return res.status(404).json({ message: "الطلب غير موجود" });
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ message: "خطأ في حذف الطلب" });
+  }
+});
+
 export default router;

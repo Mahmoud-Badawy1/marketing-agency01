@@ -1,5 +1,5 @@
 import React, { Component, ErrorInfo, ReactNode } from "react";
-import { Button } from "./ui/button";
+import { Button } from "@/components/atoms/Button";
 
 interface Props {
   children?: ReactNode;
@@ -12,7 +12,7 @@ interface State {
 
 export class ErrorBoundary extends Component<Props, State> {
   public state: State = {
-    hasError: false
+    hasError: false,
   };
 
   public static getDerivedStateFromError(error: Error): State {
@@ -27,11 +27,15 @@ export class ErrorBoundary extends Component<Props, State> {
     if (this.state.hasError) {
       return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 text-gray-900 p-4">
-          <h1 className="text-2xl font-bold text-red-600 mb-4">عذراً، حدث خطأ غير متوقع.</h1>
+          <h1 className="text-2xl font-bold text-red-600 mb-4">
+            عذراً، حدث خطأ غير متوقع.
+          </h1>
           <p className="text-gray-600 mb-6 max-w-md text-center" dir="ltr">
             {this.state.error?.message}
           </p>
-          <Button onClick={() => window.location.reload()}>إعادة تحميل الصفحة</Button>
+          <Button onClick={() => window.location.reload()}>
+            إعادة تحميل الصفحة
+          </Button>
         </div>
       );
     }

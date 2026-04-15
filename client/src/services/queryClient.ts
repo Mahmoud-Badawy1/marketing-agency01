@@ -1,0 +1,34 @@
+import { QueryClient, QueryFunction } from "@tanstack/react-query";
+
+async function throwIfResNotOk(res: Response) {
+  if (!res.ok) { const text = (await res.text()) || res.statusText; throw new Error(`${res.status}: ${text}`); }
+}
+
+export async function apiRequest(method: string, url: string, data?: unknown): Promise<Response> {
+  const token = localStorage.getItem("userToken");
+  const headers: Record<string, string> = {};
+  const isFormData = data instanceof FormData;
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+  if (data && !isFormData) headers["Content-Type"] = "application/json";
+  const res = await fetch(url, { method, headers, body: data ? (isFormData ? data : JSON.stringify(data)) : undefined, credentials: "include" });
+  await throwIfResNotOk(res);
+  return res;
+}
+
+type UnauthorizedBehavior = "returnNull" | "throw";
+export const getQueryFn = <T>(options: { on401: UnauthorizedBehavior }): QueryFunction<T> =>
+  async ({ queryKey }) => {
+    const token = localStorage.getItem("userToken");
+    const headers: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
+    const res = await fetch(queryKey.join("/") as string, { headers, credentials: "include" });
+    if (options.on401 === "returnNull" && res.status === 401) return null as T;
+    await throwIfResNotOk(res);
+    return await res.json();
+  };
+
+export const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: { queryFn: getQueryFn({ on401: "throw" }), refetchInterval: false, refetchOnWindowFocus: false, staleTime: 5 * 60 * 1000, retry: false },
+    mutations: { retry: false },
+  },
+});

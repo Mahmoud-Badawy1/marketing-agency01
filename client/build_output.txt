@@ -1,0 +1,127 @@
+
+> rest-express@1.0.0 build
+> tsx script/build.ts
+
+building client...
+[36mvite v7.3.0 [32mbuilding client environment for production...[36m[39m
+transforming...
+Browserslist: browsers data (caniuse-lite) is 6 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+
+A PostCSS plugin did not pass the `from` option to `postcss.parse`. This may cause imported assets to be incorrectly transformed. If you've recently added a PostCSS plugin that raised this warning, please contact the package author to fix the issue.
+[32m✓[39m 3005 modules transformed.
+[31m✗[39m Build failed in 2.61s
+[31mCould not resolve "../constants" from "client/src/features/admin/components/settings/SettingsTabs/SocialSection.tsx"[39m
+file: [36mD:/projects/marketing-agency01/client/src/features/admin/components/settings/SettingsTabs/SocialSection.tsx[39m
+    at getRollupError (file:///D:/projects/marketing-agency01/node_modules/rollup/dist/es/shared/parseAst.js:401:41)
+    at error (file:///D:/projects/marketing-agency01/node_modules/rollup/dist/es/shared/parseAst.js:397:42)
+    at ModuleLoader.handleInvalidResolvedId (D:\projects\marketing-agency01\node_modules\rollup\dist\es\shared\node-entry.js:21633:24)
+    at <anonymous> (D:\projects\marketing-agency01\node_modules\rollup\dist\es\shared\node-entry.js:21593:26) {
+  code: 'UNRESOLVED_IMPORT',
+  exporter: '../constants',
+  id: 'D:/projects/marketing-agency01/client/src/features/admin/components/settings/SettingsTabs/SocialSection.tsx',
+  watchFiles: [
+    'D:/projects/marketing-agency01/client/index.html',
+    'favicon.png',
+    'D:/projects/marketing-agency01/client/src/main.tsx',
+    'D:\\projects\\marketing-agency01\\package.json',
+    'D:/projects/marketing-agency01/node_modules/react/jsx-runtime.js',
+    'D:/projects/marketing-agency01/node_modules/react-dom/client.js',
+    'D:/projects/marketing-agency01/client/src/App.tsx',
+    'D:/projects/marketing-agency01/client/src/index.css',
+    'D:/projects/marketing-agency01/node_modules/react/cjs/react-jsx-runtime.production.min.js',
+    'D:/projects/marketing-agency01/node_modules/react-dom/index.js',
+    'D:/projects/marketing-agency01/client/src/config/constants.ts',
+    'D:/projects/marketing-agency01/client/src/features/admin/components/booking-policies/useBookingPolicies.ts',
+    'D:/projects/marketing-agency01/client/src/features/admin/components/calendar/calendar.types.ts',
+    'D:/projects/marketing-agency01/client/src/features/admin/components/calendar/useCalendarState.ts',
+    'D:/projects/marketing-agency01/client/src/features/admin/components/coupons/useCouponsData.ts',
+    'D:/projects/marketing-agency01/client/src/features/admin/components/experts/useExpertApplications.ts',
+    'D:/projects/marketing-agency01/client/src/features/admin/components/experts/useExpertsData.ts',
+    'D:/projects/marketing-agency01/client/src/features/admin/components/leads/useLeadsData.ts',
+    'D:/projects/marketing-agency01/client/src/features/admin/components/orders/useOrdersData.ts',
+    'D:/projects/marketing-agency01/client/src/features/admin/components/settings/useHubSpotSync.ts',
+    'D:/projects/marketing-agency01/client/src/features/admin/components/settings/useSettingsState.ts',
+    'D:/projects/marketing-agency01/client/src/features/admin/components/testimonials/useTestimonialsData.ts',
+    'D:/projects/marketing-agency01/client/src/features/admin/components/trials/useTrialsData.ts',
+    'D:/projects/marketing-agency01/client/src/features/admin/hooks/useAdminSession.ts',
+    'D:/projects/marketing-agency01/client/src/features/admin/utils/formatters.ts',
+    'D:/projects/marketing-agency01/client/src/features/auth/hooks/useUserAuth.ts',
+    'D:/projects/marketing-agency01/client/src/features/checkout/hooks/useCheckoutState.ts',
+    'D:/projects/marketing-agency01/client/src/features/contact/hooks/useContactForm.ts',
+    'D:/projects/marketing-agency01/client/src/features/dashboard/hooks/useConsultations.ts',
+    'D:/projects/marketing-agency01/client/src/features/join-team/hooks/useJoinTeamForm.ts',
+    'D:/projects/marketing-agency01/client/src/features/landing/components/demo/useDemoCalculator.ts',
+    'D:/projects/marketing-agency01/client/src/features/landing/hooks/useHeroSlides.ts',
+    'D:/projects/marketing-agency01/client/src/features/testimonials/hooks/useTestimonialsSlider.ts',
+    'D:/projects/marketing-agency01/client/src/hooks/use-excel-export.ts',
+    'D:/projects/marketing-agency01/client/src/hooks/use-public-settings.ts',
+    'D:/projects/marketing-agency01/client/src/hooks/use-smart-search.ts',
+    'D:/projects/marketing-agency01/client/src/hooks/use-toast.ts',
+    'D:/projects/marketing-agency01/client/src/lib/admin.ts',
+    'D:/projects/marketing-agency01/client/src/lib/animations.ts',
+    'D:/projects/marketing-agency01/client/src/lib/constants.ts',
+    'D:/projects/marketing-agency01/client/src/lib/fallbackImages.ts',
+    'D:/projects/marketing-agency01/client/src/lib/imageUtils.ts',
+    'D:/projects/marketing-agency01/client/src/lib/queryClient.ts',
+    'D:/projects/marketing-agency01/client/src/lib/utils.ts',
+    'D:/projects/marketing-agency01/client/src/services/admin.ts',
+    'D:/projects/marketing-agency01/client/src/services/queryClient.ts',
+    'D:/projects/marketing-agency01/client/src/utils/imageUtils.ts',
+    'D:/projects/marketing-agency01/client/src/components/admin/tabs/ExpertApplicationsTab.tsx',
+    'D:/projects/marketing-agency01/client/src/components/checkout/CouponSection.tsx',
+    'D:/projects/marketing-agency01/client/src/components/checkout/PaymentSection.tsx',
+    'D:/projects/marketing-agency01/client/src/components/checkout/PlanSummary.tsx',
+    'D:/projects/marketing-agency01/client/src/components/checkout/ProjectDetails.tsx',
+    'D:/projects/marketing-agency01/client/src/components/checkout/StepIndicator.tsx',
+    'D:/projects/marketing-agency01/client/src/components/checkout/SuccessSection.tsx',
+    'D:/projects/marketing-agency01/client/src/components/checkout/UploadSection.tsx',
+    'D:/projects/marketing-agency01/client/src/components/dashboard/AccountTab.tsx',
+    'D:/projects/marketing-agency01/client/src/components/dashboard/CancelDialog.tsx',
+    'D:/projects/marketing-agency01/client/src/components/dashboard/ConsultationDetailsDialog.tsx',
+    'D:/projects/marketing-agency01/client/src/components/dashboard/ConsultationsTab.tsx',
+    'D:/projects/marketing-agency01/client/src/components/dashboard/DashboardHeader.tsx',
+    'D:/projects/marketing-agency01/client/src/components/dashboard/OrdersTab.tsx',
+    'D:/projects/marketing-agency01/client/src/components/dashboard/RescheduleDialog.tsx',
+    'D:/projects/marketing-agency01/client/src/components/ErrorBoundary.tsx',
+    'D:/projects/marketing-agency01/client/src/components/layout/Footer.tsx',
+    'D:/projects/marketing-agency01/client/src/components/layout/Navbar.tsx',
+    'D:/projects/marketing-agency01/client/src/components/layout/Router.tsx',
+    'D:/projects/marketing-agency01/client/src/components/layout/SeasonalDecor.tsx',
+    'D:/projects/marketing-agency01/client/src/components/layout/WhatsAppFloat.tsx',
+    'D:/projects/marketing-agency01/client/src/components/pages/FAQAccordion.tsx',
+    'D:/projects/marketing-agency01/client/src/components/pages/LegalSectionsList.tsx',
+    'D:/projects/marketing-agency01/client/src/components/sections/ContactSection.tsx',
+    'D:/projects/marketing-agency01/client/src/components/sections/DemoSection.tsx',
+    'D:/projects/marketing-agency01/client/src/components/sections/EmpowerSection.tsx',
+    'D:/projects/marketing-agency01/client/src/components/sections/GallerySection.tsx',
+    'D:/projects/marketing-agency01/client/src/components/sections/HeroSection.tsx',
+    'D:/projects/marketing-agency01/client/src/components/sections/InstructorSection.tsx',
+    'D:/projects/marketing-agency01/client/src/components/sections/PricingSection.tsx',
+    'D:/projects/marketing-agency01/client/src/components/sections/ProgramsSection.tsx',
+    'D:/projects/marketing-agency01/client/src/components/sections/SkillsSection.tsx',
+    'D:/projects/marketing-agency01/client/src/components/sections/StatsSection.tsx',
+    'D:/projects/marketing-agency01/client/src/components/sections/TestimonialsSection.tsx',
+    'D:/projects/marketing-agency01/client/src/components/sections/WhySection.tsx',
+    'D:/projects/marketing-agency01/client/src/components/ui/accordion.tsx',
+    'D:/projects/marketing-agency01/client/src/components/ui/alert-dialog.tsx',
+    'D:/projects/marketing-agency01/client/src/components/ui/alert.tsx',
+    'D:/projects/marketing-agency01/client/src/components/ui/aspect-ratio.tsx',
+    'D:/projects/marketing-agency01/client/src/components/ui/avatar.tsx',
+    'D:/projects/marketing-agency01/client/src/components/ui/badge.tsx',
+    'D:/projects/marketing-agency01/client/src/components/ui/breadcrumb.tsx',
+    'D:/projects/marketing-agency01/client/src/components/ui/button.tsx',
+    'D:/projects/marketing-agency01/client/src/components/ui/calendar.tsx',
+    'D:/projects/marketing-agency01/client/src/components/ui/card.tsx',
+    'D:/projects/marketing-agency01/client/src/components/ui/carousel.tsx',
+    'D:/projects/marketing-agency01/client/src/components/ui/chart.tsx',
+    'D:/projects/marketing-agency01/client/src/components/ui/checkbox.tsx',
+    'D:/projects/marketing-agency01/client/src/components/ui/collapsible.tsx',
+    'D:/projects/marketing-agency01/client/src/components/ui/command.tsx',
+    'D:/projects/marketing-agency01/client/src/components/ui/context-menu.tsx',
+    'D:/projects/marketing-agency01/client/src/components/ui/dialog.tsx',
+    'D:/projects/marketing-agency01/client/src/components/ui/drawer.tsx',
+    ... 2933 more items
+  ]
+}

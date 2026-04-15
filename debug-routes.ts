@@ -1,5 +1,5 @@
 import express from 'express';
-import { registerRoutes } from './api/server/routes.js';
+import { registerRoutes } from './api/_server/routes.js';
 import { createServer } from 'http';
 
 const app = express();

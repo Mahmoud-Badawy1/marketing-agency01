@@ -32,12 +32,14 @@ export interface IStorage {
   createLead(lead: InsertLead): Promise<LeadType>;
   getLeads(): Promise<LeadType[]>;
   updateLeadStatus(id: string, status: string): Promise<LeadType | null>;
+  deleteLead(id: string): Promise<boolean>;
   createOrder(order: InsertOrder): Promise<OrderType>;
   getOrders(): Promise<OrderType[]>;
   getUserOrders(userId: string): Promise<OrderType[]>;
   updateOrderStatus(id: string, status: string): Promise<OrderType | null>;
   updateOrderPlan(id: string, plan: string, amount: number): Promise<OrderType | null>;
   cancelOrder(id: string, reason: string): Promise<OrderType | null>;
+  deleteOrder(id: string): Promise<boolean>;
   updateOrderImage(id: string, url: string): Promise<OrderType | null>;
   createTrialBooking(booking: InsertTrialBooking): Promise<TrialBookingType>;
   getTrialBookings(): Promise<TrialBookingType[]>;
@@ -181,6 +183,11 @@ export class DatabaseStorage implements IStorage {
     return await Lead.findByIdAndUpdate(id, { status }, { new: true }).lean() as LeadType | null;
   }
 
+  async deleteLead(id: string): Promise<boolean> {
+    const result = await Lead.findByIdAndDelete(id);
+    return !!result;
+  }
+
   async createOrder(insertOrder: InsertOrder): Promise<OrderType> {
     const order = new Order(insertOrder);
     const saved = await order.save();
@@ -201,6 +208,11 @@ export class DatabaseStorage implements IStorage {
 
   async cancelOrder(id: string, reason: string): Promise<OrderType | null> {
     return await Order.findByIdAndUpdate(id, { status: 'cancelled', cancelReason: reason }, { new: true }).lean() as OrderType | null;
+  }
+
+  async deleteOrder(id: string): Promise<boolean> {
+    const result = await Order.findByIdAndDelete(id);
+    return !!result;
   }
 
   async getOrders(): Promise<OrderType[]> {
