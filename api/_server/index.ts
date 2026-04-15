@@ -21,9 +21,34 @@ app.use((_req, res, next) => {
   res.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
   res.set("X-DNS-Prefetch-Control", "off");
   res.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
-  res.set("Content-Security-Policy", "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline' fonts.googleapis.com; img-src 'self' data: res.cloudinary.com; font-src 'self' fonts.gstatic.com; connect-src 'self';");
+
+  const isDev = process.env.NODE_ENV !== "production";
+  if (isDev) {
+    // Permissive CSP for local dev — Vite HMR uses blob: URLs and WebSocket connections
+    res.set("Content-Security-Policy",
+      "default-src 'self'; " +
+      "script-src 'self' 'unsafe-eval' 'unsafe-inline' blob:; " +
+      "worker-src blob: 'self'; " +
+      "style-src 'self' 'unsafe-inline' fonts.googleapis.com; " +
+      "img-src 'self' data: blob: res.cloudinary.com; " +
+      "font-src 'self' fonts.gstatic.com; " +
+      "connect-src 'self' ws://localhost:* wss://localhost:* http://localhost:*;"
+    );
+  } else {
+    // Strict CSP for production
+    res.set("Content-Security-Policy",
+      "default-src 'self'; " +
+      "script-src 'self' 'unsafe-eval' 'unsafe-inline'; " +
+      "style-src 'self' 'unsafe-inline' fonts.googleapis.com; " +
+      "img-src 'self' data: res.cloudinary.com; " +
+      "font-src 'self' fonts.gstatic.com; " +
+      "connect-src 'self';"
+    );
+  }
+
   next();
 });
+
 
 // CORS Config
 app.use((req, res, next) => {

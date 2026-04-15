@@ -15,27 +15,19 @@ interface StatsSectionProps {
 export function StatsSection({ stats, setStats, handleSave, isSaving }: StatsSectionProps) {
   return (
     <AccordionItem value="item-6Stats" className="bg-card border shadow-sm rounded-lg overflow-hidden mb-6 border-none">
-      <div className="flex items-center justify-between px-4 border-b ">
-        <AccordionTrigger className="flex-1 px-6 py-4 hover:no-underline hover:bg-muted/50 transition-colors border-none group">
-          <div className="flex items-center gap-2">
-            <BarChart3 className="h-5 w-5 text-primary group-data-[state=open]:text-foreground transition-colors" />
-            <span className="font-semibold">إحصائيات النجاح (Success Stats)</span>
-          </div>
-        </AccordionTrigger>
-        <Button 
-          variant="outline" 
-          size="sm" 
-          className="mr-6 relative z-10" 
-          onClick={(e) => {
-            e.stopPropagation();
-            setStats((p: any[]) => [...p, { label: {ar:"", en:""}, value: "", color: "" }]);
-          }}
-        >
-          <Plus className="h-4 w-4 ml-1" /> إضافة إحصائية
-        </Button>
-      </div>
+      <AccordionTrigger className="px-6 py-4 hover:no-underline hover:bg-muted/50 transition-colors border-none group">
+        <div className="flex items-center gap-2">
+          <BarChart3 className="h-5 w-5 text-primary" />
+          <span className="font-semibold">إحصائيات النجاح (Success Stats)</span>
+        </div>
+      </AccordionTrigger>
       <AccordionContent className="pt-0">
         <CardContent className="space-y-6 pt-6">
+          <div className="flex justify-end">
+            <Button variant="outline" size="sm" onClick={() => setStats((p: any[]) => [...p, { label: {ar:"", en:""}, value: "", color: "" }])}>
+              <Plus className="h-4 w-4 ml-1" /> إضافة إحصائية
+            </Button>
+          </div>
           {stats.map((st, i) => (
             <div key={i} className="flex gap-2 items-start border p-4 rounded-md bg-muted/5 mb-4">
               <div className="flex-1 space-y-4">

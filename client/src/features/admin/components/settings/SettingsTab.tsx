@@ -1,4 +1,3 @@
-import { Accordion } from "@/components/ui/accordion";
 import { useSettingsState } from "./useSettingsState";
 import { useHubSpotSync } from "./useHubSpotSync";
 import { HeroSection } from "./SettingsTabs/HeroSection";
@@ -16,6 +15,7 @@ import { ServicesSection } from "./SettingsTabs/ServicesSection";
 import { EmpowerSection } from "./SettingsTabs/EmpowerSection";
 import { HubSpotSection } from "./SettingsTabs/HubSpotSection";
 import { CommunicationSection } from "./SettingsTabs/CommunicationSection";
+import { Accordion } from "@/components/ui/accordion";
 
 export function SettingsTab() {
   const s = useSettingsState();

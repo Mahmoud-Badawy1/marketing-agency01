@@ -14,27 +14,19 @@ interface ServicesSectionProps {
 export function ServicesSection({ services, setServices, handleSave, isSaving }: ServicesSectionProps) {
   return (
     <AccordionItem value="item-11Services" className="bg-card border shadow-sm rounded-lg overflow-hidden mb-6 border-none">
-      <div className="flex items-center justify-between px-4 border-b ">
-        <AccordionTrigger className="px-6 py-4 hover:no-underline hover:bg-muted/50 transition-colors border-none group">
-          <div className="flex items-center gap-2">
-            <Briefcase className="h-5 w-5 text-primary group-data-[state=open]:text-foreground transition-colors" />
-            <span className="font-semibold">خدمات الوكالة (Agency Services)</span>
-          </div>
-        </AccordionTrigger>
-        <Button 
-          variant="outline" 
-          size="sm" 
-          className="mr-6 relative z-10" 
-          onClick={(e) => {
-            e.stopPropagation();
-            setServices((p: any[]) => [...p, { title: {ar:"", en:""}, icon: "Star" }]);
-          }}
-        >
-          <Plus className="h-4 w-4 ml-1" /> إضافة خدمة
-        </Button>
-      </div>
+      <AccordionTrigger className="px-6 py-4 hover:no-underline hover:bg-muted/50 transition-colors border-none group">
+        <div className="flex items-center gap-2">
+          <Briefcase className="h-5 w-5 text-primary" />
+          <span className="font-semibold">خدمات الوكالة (Agency Services)</span>
+        </div>
+      </AccordionTrigger>
       <AccordionContent className="pt-0">
         <CardContent className="space-y-6 pt-6">
+          <div className="flex justify-end">
+            <Button variant="outline" size="sm" onClick={() => setServices((p: any[]) => [...p, { title: {ar:"", en:""}, icon: "Star" }])}>
+              <Plus className="h-4 w-4 ml-1" /> إضافة خدمة
+            </Button>
+          </div>
           {services.map((service, i) => (
             <div key={i} className="flex gap-2 items-start border p-4 rounded-md bg-muted/5">
               <div className="flex-1 space-y-4">

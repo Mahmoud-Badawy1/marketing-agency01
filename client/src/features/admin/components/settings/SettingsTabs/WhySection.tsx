@@ -15,27 +15,19 @@ interface WhySectionProps {
 export function WhySection({ whyCards, setWhyCards, handleSave, isSaving }: WhySectionProps) {
   return (
     <AccordionItem value="item-7Why" className="bg-card border shadow-sm rounded-lg overflow-hidden mb-6 border-none">
-      <div className="flex items-center justify-between px-4 border-b ">
-        <AccordionTrigger className="px-6 py-4 hover:no-underline hover:bg-muted/50 transition-colors border-none group">
-          <div className="flex items-center gap-2">
-            <Star className="h-5 w-5 text-primary group-data-[state=open]:text-foreground transition-colors" />
-            <span className="font-semibold">لماذا ماركتير برو؟ (Why Us)</span>
-          </div>
-        </AccordionTrigger>
-        <Button 
-          variant="outline" 
-          size="sm" 
-          className="mr-6 relative z-10" 
-          onClick={(e) => {
-            e.stopPropagation();
-            setWhyCards((p: any[]) => [...p, { title: {ar:"", en:""}, description: {ar:"", en:""}, type: "solution" }]);
-          }}
-        >
-          <Plus className="h-4 w-4 ml-1" /> إضافة بطاقة
-        </Button>
-      </div>
+      <AccordionTrigger className="px-6 py-4 hover:no-underline hover:bg-muted/50 transition-colors border-none group">
+        <div className="flex items-center gap-2">
+          <Star className="h-5 w-5 text-primary" />
+          <span className="font-semibold">لماذا ماركتير برو؟ (Why Us)</span>
+        </div>
+      </AccordionTrigger>
       <AccordionContent className="pt-0">
         <CardContent className="space-y-6 pt-6">
+          <div className="flex justify-end">
+            <Button variant="outline" size="sm" onClick={() => setWhyCards((p: any[]) => [...p, { title: {ar:"", en:""}, description: {ar:"", en:""}, type: "solution" }])}>
+              <Plus className="h-4 w-4 ml-1" /> إضافة بطاقة
+            </Button>
+          </div>
           {whyCards.map((card, i) => (
             <div key={i} className="border p-4 rounded-lg bg-card/50 space-y-4">
               <div className="flex justify-between items-center mb-2">

@@ -24,67 +24,67 @@ computing gzip size...
 [2m../dist/public/[22m[32massets/gallery_success-BFte08SP.png                     [39m[1m[2m647.59 kB[22m[1m[22m
 [2m../dist/public/[22m[32massets/تصميم_بدون_عنوان_(1)_1771129139868-CRFydepT.png  [39m[1m[2m738.19 kB[22m[1m[22m
 [2m../dist/public/[22m[32massets/gallery_workshop-BfGpxTpw.png                    [39m[1m[2m740.50 kB[22m[1m[22m
-[2m../dist/public/[22m[35massets/index-CYPot2Ru.css                               [39m[1m[2m119.05 kB[22m[1m[22m[2m │ gzip:  17.94 kB[22m
+[2m../dist/public/[22m[35massets/index-CQ_ohKi2.css                               [39m[1m[2m118.66 kB[22m[1m[22m[2m │ gzip:  17.85 kB[22m
 [2m../dist/public/[22m[36massets/vendor-forms-WRgc_zzc.js                         [39m[1m[2m  0.04 kB[22m[1m[22m[2m │ gzip:   0.06 kB[22m
 [2m../dist/public/[22m[36massets/instructor-0i-juVUf.js                           [39m[1m[2m  0.06 kB[22m[1m[22m[2m │ gzip:   0.08 kB[22m
-[2m../dist/public/[22m[36massets/message-circle-BSo1xBdh.js                       [39m[1m[2m  0.14 kB[22m[1m[22m[2m │ gzip:   0.15 kB[22m
-[2m../dist/public/[22m[36massets/arrow-right-f2Fqjb49.js                          [39m[1m[2m  0.16 kB[22m[1m[22m[2m │ gzip:   0.16 kB[22m
-[2m../dist/public/[22m[36massets/clock-D5afNYqg.js                                [39m[1m[2m  0.18 kB[22m[1m[22m[2m │ gzip:   0.16 kB[22m
-[2m../dist/public/[22m[36massets/star-BcN70opd.js                                 [39m[1m[2m  0.21 kB[22m[1m[22m[2m │ gzip:   0.18 kB[22m
-[2m../dist/public/[22m[36massets/mail-B6bUJf7I.js                                 [39m[1m[2m  0.21 kB[22m[1m[22m[2m │ gzip:   0.19 kB[22m
-[2m../dist/public/[22m[36massets/circle-help-ChNKdWRp.js                          [39m[1m[2m  0.23 kB[22m[1m[22m[2m │ gzip:   0.20 kB[22m
-[2m../dist/public/[22m[36massets/heart-BosfQxqL.js                                [39m[1m[2m  0.24 kB[22m[1m[22m[2m │ gzip:   0.21 kB[22m
-[2m../dist/public/[22m[36massets/circle-alert-D9uAXSnn.js                         [39m[1m[2m  0.25 kB[22m[1m[22m[2m │ gzip:   0.18 kB[22m
-[2m../dist/public/[22m[36massets/upload-Cw0wp5AS.js                               [39m[1m[2m  0.25 kB[22m[1m[22m[2m │ gzip:   0.21 kB[22m
-[2m../dist/public/[22m[36massets/calendar-DWCmAW4X.js                             [39m[1m[2m  0.25 kB[22m[1m[22m[2m │ gzip:   0.20 kB[22m
-[2m../dist/public/[22m[36massets/shield-sxIam1H2.js                               [39m[1m[2m  0.27 kB[22m[1m[22m[2m │ gzip:   0.22 kB[22m
-[2m../dist/public/[22m[36massets/book-open-Blh_SDra.js                            [39m[1m[2m  0.28 kB[22m[1m[22m[2m │ gzip:   0.20 kB[22m
-[2m../dist/public/[22m[36massets/file-text-DTva0-dI.js                            [39m[1m[2m  0.33 kB[22m[1m[22m[2m │ gzip:   0.21 kB[22m
-[2m../dist/public/[22m[36massets/quote-DwD0727u.js                                [39m[1m[2m  0.39 kB[22m[1m[22m[2m │ gzip:   0.20 kB[22m
-[2m../dist/public/[22m[36massets/phone-D6rsNvHJ.js                                [39m[1m[2m  0.39 kB[22m[1m[22m[2m │ gzip:   0.25 kB[22m
-[2m../dist/public/[22m[36massets/search-C3RsMzcB.js                               [39m[1m[2m  0.54 kB[22m[1m[22m[2m │ gzip:   0.33 kB[22m
-[2m../dist/public/[22m[36massets/Textarea-fR4CtpKp.js                             [39m[1m[2m  0.58 kB[22m[1m[22m[2m │ gzip:   0.36 kB[22m
-[2m../dist/public/[22m[36massets/LegalSectionsList-BGSDJ_bF.js                    [39m[1m[2m  0.62 kB[22m[1m[22m[2m │ gzip:   0.39 kB[22m
+[2m../dist/public/[22m[36massets/message-circle-DfKvEgEG.js                       [39m[1m[2m  0.14 kB[22m[1m[22m[2m │ gzip:   0.15 kB[22m
+[2m../dist/public/[22m[36massets/arrow-right-BAbpsNeH.js                          [39m[1m[2m  0.16 kB[22m[1m[22m[2m │ gzip:   0.16 kB[22m
+[2m../dist/public/[22m[36massets/clock-1dOlzXgt.js                                [39m[1m[2m  0.18 kB[22m[1m[22m[2m │ gzip:   0.17 kB[22m
+[2m../dist/public/[22m[36massets/star-Cdyx5hnA.js                                 [39m[1m[2m  0.21 kB[22m[1m[22m[2m │ gzip:   0.19 kB[22m
+[2m../dist/public/[22m[36massets/mail-kj1okkKt.js                                 [39m[1m[2m  0.21 kB[22m[1m[22m[2m │ gzip:   0.20 kB[22m
+[2m../dist/public/[22m[36massets/circle-help-COWYblUL.js                          [39m[1m[2m  0.23 kB[22m[1m[22m[2m │ gzip:   0.20 kB[22m
+[2m../dist/public/[22m[36massets/heart-CXeZbqKD.js                                [39m[1m[2m  0.24 kB[22m[1m[22m[2m │ gzip:   0.21 kB[22m
+[2m../dist/public/[22m[36massets/circle-alert-CLlVyH2C.js                         [39m[1m[2m  0.25 kB[22m[1m[22m[2m │ gzip:   0.19 kB[22m
+[2m../dist/public/[22m[36massets/upload-CiV0UY2G.js                               [39m[1m[2m  0.25 kB[22m[1m[22m[2m │ gzip:   0.22 kB[22m
+[2m../dist/public/[22m[36massets/calendar-DZfoahzb.js                             [39m[1m[2m  0.25 kB[22m[1m[22m[2m │ gzip:   0.20 kB[22m
+[2m../dist/public/[22m[36massets/shield-C0VrKksV.js                               [39m[1m[2m  0.27 kB[22m[1m[22m[2m │ gzip:   0.22 kB[22m
+[2m../dist/public/[22m[36massets/book-open-eAFbAHgO.js                            [39m[1m[2m  0.28 kB[22m[1m[22m[2m │ gzip:   0.21 kB[22m
+[2m../dist/public/[22m[36massets/file-text-Bgv0EqPD.js                            [39m[1m[2m  0.33 kB[22m[1m[22m[2m │ gzip:   0.21 kB[22m
+[2m../dist/public/[22m[36massets/quote-5Wx40KUr.js                                [39m[1m[2m  0.39 kB[22m[1m[22m[2m │ gzip:   0.20 kB[22m
+[2m../dist/public/[22m[36massets/phone-BkrqNXGU.js                                [39m[1m[2m  0.39 kB[22m[1m[22m[2m │ gzip:   0.25 kB[22m
+[2m../dist/public/[22m[36massets/search-BM8S1FEO.js                               [39m[1m[2m  0.54 kB[22m[1m[22m[2m │ gzip:   0.33 kB[22m
+[2m../dist/public/[22m[36massets/Textarea-DydG1G3_.js                             [39m[1m[2m  0.58 kB[22m[1m[22m[2m │ gzip:   0.37 kB[22m
+[2m../dist/public/[22m[36massets/LegalSectionsList-ARlCdcDP.js                    [39m[1m[2m  0.62 kB[22m[1m[22m[2m │ gzip:   0.39 kB[22m
 [2m../dist/public/[22m[36massets/use-auth-MVq5Nhg_.js                             [39m[1m[2m  0.63 kB[22m[1m[22m[2m │ gzip:   0.42 kB[22m
-[2m../dist/public/[22m[36massets/settings-B0AccpMY.js                             [39m[1m[2m  0.72 kB[22m[1m[22m[2m │ gzip:   0.34 kB[22m
-[2m../dist/public/[22m[36massets/Badge-DvJCkAo6.js                                [39m[1m[2m  0.77 kB[22m[1m[22m[2m │ gzip:   0.42 kB[22m
-[2m../dist/public/[22m[36massets/trash-2-DMw53sdn.js                              [39m[1m[2m  0.91 kB[22m[1m[22m[2m │ gzip:   0.50 kB[22m
-[2m../dist/public/[22m[36massets/Input-UwOmxDNM.js                                [39m[1m[2m  0.94 kB[22m[1m[22m[2m │ gzip:   0.48 kB[22m
-[2m../dist/public/[22m[36massets/card-BL3B5Qzq.js                                 [39m[1m[2m  1.11 kB[22m[1m[22m[2m │ gzip:   0.42 kB[22m
-[2m../dist/public/[22m[36massets/admin-DDAE_YRt.js                                [39m[1m[2m  1.14 kB[22m[1m[22m[2m │ gzip:   0.67 kB[22m
-[2m../dist/public/[22m[36massets/not-found--6oro4n9.js                            [39m[1m[2m  1.30 kB[22m[1m[22m[2m │ gzip:   0.71 kB[22m
-[2m../dist/public/[22m[36massets/AdminLogin-_5NUePPZ.js                           [39m[1m[2m  3.09 kB[22m[1m[22m[2m │ gzip:   1.56 kB[22m
-[2m../dist/public/[22m[36massets/select-DUfm0WJD.js                               [39m[1m[2m  3.30 kB[22m[1m[22m[2m │ gzip:   1.22 kB[22m
-[2m../dist/public/[22m[36massets/EmpowerSection-Dx4FGKlD.js                       [39m[1m[2m  3.41 kB[22m[1m[22m[2m │ gzip:   1.70 kB[22m
-[2m../dist/public/[22m[36massets/ProgramsSection-B5nQvsXz.js                      [39m[1m[2m  3.81 kB[22m[1m[22m[2m │ gzip:   1.60 kB[22m
-[2m../dist/public/[22m[36massets/dialog-DnJBzQ35.js                               [39m[1m[2m  3.89 kB[22m[1m[22m[2m │ gzip:   1.42 kB[22m
-[2m../dist/public/[22m[36massets/PricingSection-BiJWtXpZ.js                       [39m[1m[2m  4.38 kB[22m[1m[22m[2m │ gzip:   1.79 kB[22m
-[2m../dist/public/[22m[36massets/SkillsSection-dAOf_QqB.js                        [39m[1m[2m  5.16 kB[22m[1m[22m[2m │ gzip:   2.18 kB[22m
-[2m../dist/public/[22m[36massets/TestimonialsSection-DWoH3zH9.js                  [39m[1m[2m  5.46 kB[22m[1m[22m[2m │ gzip:   2.29 kB[22m
-[2m../dist/public/[22m[36massets/SeasonalDecor-CAhABudV.js                        [39m[1m[2m  6.23 kB[22m[1m[22m[2m │ gzip:   2.63 kB[22m
-[2m../dist/public/[22m[36massets/Privacy-B_gXTY8i.js                              [39m[1m[2m  6.26 kB[22m[1m[22m[2m │ gzip:   2.62 kB[22m
-[2m../dist/public/[22m[36massets/GallerySection-CvTtQUWu.js                       [39m[1m[2m  6.57 kB[22m[1m[22m[2m │ gzip:   2.24 kB[22m
-[2m../dist/public/[22m[36massets/Terms-C-344ZHQ.js                                [39m[1m[2m  6.61 kB[22m[1m[22m[2m │ gzip:   2.86 kB[22m
-[2m../dist/public/[22m[36massets/InstructorSection-UeMUnNKO.js                    [39m[1m[2m  7.27 kB[22m[1m[22m[2m │ gzip:   2.35 kB[22m
-[2m../dist/public/[22m[36massets/FAQ-C6X0Md3D.js                                  [39m[1m[2m  7.65 kB[22m[1m[22m[2m │ gzip:   3.36 kB[22m
-[2m../dist/public/[22m[36massets/DemoSection-BcXVcDhS.js                          [39m[1m[2m  8.87 kB[22m[1m[22m[2m │ gzip:   2.52 kB[22m
-[2m../dist/public/[22m[36massets/UserLoginPage-kj0Ri5Fk.js                        [39m[1m[2m  9.71 kB[22m[1m[22m[2m │ gzip:   3.06 kB[22m
-[2m../dist/public/[22m[36massets/ContactSection-CCbD98s9.js                       [39m[1m[2m 13.04 kB[22m[1m[22m[2m │ gzip:   4.56 kB[22m
-[2m../dist/public/[22m[36massets/JoinTeam-D4UvATuG.js                             [39m[1m[2m 18.79 kB[22m[1m[22m[2m │ gzip:   6.44 kB[22m
-[2m../dist/public/[22m[36massets/carousel-DaIcRYOA.js                             [39m[1m[2m 22.67 kB[22m[1m[22m[2m │ gzip:   9.13 kB[22m
-[2m../dist/public/[22m[36massets/UserDashboard-sEHnO88t.js                        [39m[1m[2m 25.20 kB[22m[1m[22m[2m │ gzip:   7.36 kB[22m
-[2m../dist/public/[22m[36massets/CheckoutPage-BbWY7BgM.js                         [39m[1m[2m 26.42 kB[22m[1m[22m[2m │ gzip:   8.30 kB[22m
+[2m../dist/public/[22m[36massets/settings-B6bZCFv1.js                             [39m[1m[2m  0.72 kB[22m[1m[22m[2m │ gzip:   0.34 kB[22m
+[2m../dist/public/[22m[36massets/Badge-C_BI1xVI.js                                [39m[1m[2m  0.77 kB[22m[1m[22m[2m │ gzip:   0.42 kB[22m
+[2m../dist/public/[22m[36massets/trash-2-DX5auVKy.js                              [39m[1m[2m  0.91 kB[22m[1m[22m[2m │ gzip:   0.50 kB[22m
+[2m../dist/public/[22m[36massets/Input-nXaqBYhU.js                                [39m[1m[2m  0.94 kB[22m[1m[22m[2m │ gzip:   0.48 kB[22m
+[2m../dist/public/[22m[36massets/card-Crp5Zl8P.js                                 [39m[1m[2m  1.11 kB[22m[1m[22m[2m │ gzip:   0.42 kB[22m
+[2m../dist/public/[22m[36massets/admin-DQhEHkpG.js                                [39m[1m[2m  1.14 kB[22m[1m[22m[2m │ gzip:   0.67 kB[22m
+[2m../dist/public/[22m[36massets/not-found-WOpNXz5A.js                            [39m[1m[2m  1.30 kB[22m[1m[22m[2m │ gzip:   0.71 kB[22m
+[2m../dist/public/[22m[36massets/AdminLogin-Bz5P1YIf.js                           [39m[1m[2m  3.09 kB[22m[1m[22m[2m │ gzip:   1.56 kB[22m
+[2m../dist/public/[22m[36massets/select-D2mBq9Cd.js                               [39m[1m[2m  3.30 kB[22m[1m[22m[2m │ gzip:   1.23 kB[22m
+[2m../dist/public/[22m[36massets/EmpowerSection-B_3RQzry.js                       [39m[1m[2m  3.41 kB[22m[1m[22m[2m │ gzip:   1.70 kB[22m
+[2m../dist/public/[22m[36massets/ProgramsSection-BsC47qkz.js                      [39m[1m[2m  3.81 kB[22m[1m[22m[2m │ gzip:   1.60 kB[22m
+[2m../dist/public/[22m[36massets/dialog-DzC37n8k.js                               [39m[1m[2m  3.89 kB[22m[1m[22m[2m │ gzip:   1.42 kB[22m
+[2m../dist/public/[22m[36massets/PricingSection-C3Uqsuwq.js                       [39m[1m[2m  4.38 kB[22m[1m[22m[2m │ gzip:   1.79 kB[22m
+[2m../dist/public/[22m[36massets/SkillsSection-CgUZWErM.js                        [39m[1m[2m  5.16 kB[22m[1m[22m[2m │ gzip:   2.18 kB[22m
+[2m../dist/public/[22m[36massets/TestimonialsSection-Bq2jUAaZ.js                  [39m[1m[2m  5.46 kB[22m[1m[22m[2m │ gzip:   2.29 kB[22m
+[2m../dist/public/[22m[36massets/SeasonalDecor-CjpffBOF.js                        [39m[1m[2m  6.23 kB[22m[1m[22m[2m │ gzip:   2.64 kB[22m
+[2m../dist/public/[22m[36massets/Privacy-DdaCabWE.js                              [39m[1m[2m  6.26 kB[22m[1m[22m[2m │ gzip:   2.62 kB[22m
+[2m../dist/public/[22m[36massets/GallerySection-Dy96VrdK.js                       [39m[1m[2m  6.57 kB[22m[1m[22m[2m │ gzip:   2.23 kB[22m
+[2m../dist/public/[22m[36massets/Terms-CNgSAvuz.js                                [39m[1m[2m  6.61 kB[22m[1m[22m[2m │ gzip:   2.86 kB[22m
+[2m../dist/public/[22m[36massets/InstructorSection-D-7R7fSy.js                    [39m[1m[2m  7.27 kB[22m[1m[22m[2m │ gzip:   2.35 kB[22m
+[2m../dist/public/[22m[36massets/FAQ-Di75nCIZ.js                                  [39m[1m[2m  7.65 kB[22m[1m[22m[2m │ gzip:   3.37 kB[22m
+[2m../dist/public/[22m[36massets/DemoSection-c9EdWeCc.js                          [39m[1m[2m  8.87 kB[22m[1m[22m[2m │ gzip:   2.52 kB[22m
+[2m../dist/public/[22m[36massets/UserLoginPage-D5bVBf6H.js                        [39m[1m[2m  9.71 kB[22m[1m[22m[2m │ gzip:   3.06 kB[22m
+[2m../dist/public/[22m[36massets/ContactSection-DVFsFVPF.js                       [39m[1m[2m 13.04 kB[22m[1m[22m[2m │ gzip:   4.57 kB[22m
+[2m../dist/public/[22m[36massets/JoinTeam-BRvdgnMy.js                             [39m[1m[2m 18.79 kB[22m[1m[22m[2m │ gzip:   6.44 kB[22m
+[2m../dist/public/[22m[36massets/carousel-BX4_FTx_.js                             [39m[1m[2m 22.67 kB[22m[1m[22m[2m │ gzip:   9.13 kB[22m
+[2m../dist/public/[22m[36massets/UserDashboard-CBEUgoAM.js                        [39m[1m[2m 25.20 kB[22m[1m[22m[2m │ gzip:   7.36 kB[22m
+[2m../dist/public/[22m[36massets/CheckoutPage-BC_S6shb.js                         [39m[1m[2m 26.42 kB[22m[1m[22m[2m │ gzip:   8.30 kB[22m
 [2m../dist/public/[22m[36massets/ar-B0bEbGr0.js                                   [39m[1m[2m 28.33 kB[22m[1m[22m[2m │ gzip:   7.55 kB[22m
-[2m../dist/public/[22m[36massets/calendar-BdjpcHAW.js                             [39m[1m[2m 35.04 kB[22m[1m[22m[2m │ gzip:  11.16 kB[22m
+[2m../dist/public/[22m[36massets/calendar-CVJTJewH.js                             [39m[1m[2m 35.04 kB[22m[1m[22m[2m │ gzip:  11.16 kB[22m
 [2m../dist/public/[22m[36massets/vendor-query-5e5x5XOl.js                         [39m[1m[2m 47.68 kB[22m[1m[22m[2m │ gzip:  15.13 kB[22m
-[2m../dist/public/[22m[36massets/index-D-f8pE8D.js                                [39m[1m[2m 96.99 kB[22m[1m[22m[2m │ gzip:  33.70 kB[22m
+[2m../dist/public/[22m[36massets/index-DwJ6dLHf.js                                [39m[1m[2m 97.01 kB[22m[1m[22m[2m │ gzip:  33.70 kB[22m
 [2m../dist/public/[22m[36massets/vendor-motion-Dy11CyrM.js                        [39m[1m[2m115.25 kB[22m[1m[22m[2m │ gzip:  38.05 kB[22m
 [2m../dist/public/[22m[36massets/vendor-radix-C4zqlehM.js                         [39m[1m[2m136.01 kB[22m[1m[22m[2m │ gzip:  41.82 kB[22m
 [2m../dist/public/[22m[36massets/vendor-react-eIGzYllW.js                         [39m[1m[2m146.25 kB[22m[1m[22m[2m │ gzip:  47.84 kB[22m
-[2m../dist/public/[22m[36massets/AdminDashboard-D37dvAwz.js                       [39m[1m[2m444.55 kB[22m[1m[22m[2m │ gzip: 129.81 kB[22m
-[32m✓ built in 4.64s[39m
+[2m../dist/public/[22m[36massets/AdminDashboard-CnZ5a4ge.js                       [39m[1m[2m446.67 kB[22m[1m[22m[2m │ gzip: 130.89 kB[22m
+[32m✓ built in 4.92s[39m
 building server...
 
   dist\index.cjs  2.9mb
 
-Done in 2524ms
+Done in 144ms
